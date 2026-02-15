@@ -16,7 +16,15 @@ import {
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   const [convex] = useState(() => {
-    return new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!convexUrl) {
+      // During build/prerendering, NEXT_PUBLIC_CONVEX_URL might be missing.
+      // We provide a placeholder URL to avoid crashing the constructor,
+      // as the client won't actually be used for networking during static generation.
+      console.warn("NEXT_PUBLIC_CONVEX_URL is not defined. Using placeholder for build.");
+      return new ConvexReactClient("https://placeholder.convex.cloud");
+    }
+    return new ConvexReactClient(convexUrl);
   });
 
   return (
