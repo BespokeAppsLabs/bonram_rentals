@@ -1,7 +1,11 @@
 import { authkitMiddleware } from "@workos-inc/authkit-nextjs";
 
 export default authkitMiddleware({
-    redirectUri: process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || process.env.WORKOS_REDIRECT_URI,
+    // Use environment variables if present, otherwise fallback to the known production domain
+    // This prevents the "You must provide a redirect URI" error if Vercel secrets are missing.
+    redirectUri: process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ||
+        process.env.WORKOS_REDIRECT_URI ||
+        "https://bonram-rentals-of36.vercel.app/callback",
     middlewareAuth: {
         enabled: true,
         unauthenticatedPaths: [
