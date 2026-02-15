@@ -21,9 +21,9 @@ export function Footer({ className }: FooterProps) {
             <div className="flex items-center gap-3 mb-6">
               <div className="relative h-20 w-auto">
                 <img
-                  src="/bonram-rentals-logo.jpeg"
+                  src="/Bonram-Logo-Transparent.png"
                   alt="Bonram Rentals"
-                  className="h-full w-auto object-contain brightness-0 invert"
+                  className="h-full w-auto object-contain"
                 />
               </div>
             </div>

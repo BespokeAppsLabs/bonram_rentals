@@ -132,9 +132,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <a href="/" className="flex items-center gap-3">
                         <div className="relative h-14 w-auto">
                             <img
-                                src="/bonram-rentals-logo.jpeg"
+                                src="/Bonram-Logo-Transparent.png"
                                 alt="Bonram Rentals"
-                                className="h-full w-auto object-contain brightness-0 invert"
+                                className="h-full w-auto object-contain"
                             />
                         </div>
                         <div className="flex flex-col">
