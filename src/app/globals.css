@@ -1,26 +1,127 @@
 @import "tailwindcss";
 
+/* ========================================
+   BONRAM RENTALS - Design System Tokens
+   Institutional Luxury Theme
+   ======================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors - No Shading/Opacity */
+  --navy: #002366;
+  --navy-dark: #002366;
+  --navy-light: #002366;
+
+  /* Accent Colors - No Shading/Opacity */
+  --gold: #b59461;
+  --gold-light: #b59461;
+  --gold-dark: #b59461;
+
+  /* Neutral Colors */
+  --white: #ffffff;
+  --mist: #f8fafc;
+  /* Slightly cleaner blue-ish white */
+  --charcoal: #0f172a;
+  /* Slate-900 for better luxury contrast */
+  --gray-light: #e2e8f0;
+  --gray: #64748b;
+
+  /* Semantic Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Background & Foreground */
+  --background: var(--white);
+  --foreground: var(--charcoal);
+
+  /* Rounded Corners - Subtle for Luxury */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  /* Spacing */
+  --spacing-luxury: 4rem;
 }
 
+/* Tailwind v4 Theme Configuration */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-navy: var(--navy);
+  --color-navy-dark: var(--navy-dark);
+  --color-navy-light: var(--navy-light);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-mist: var(--mist);
+  --color-charcoal: var(--charcoal);
+
+  /* Fonts - Institutional Luxury Pair */
+  --font-heading: "Bodoni Moda", serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading) !important;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Focus States */
+*:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: var(--gold);
+  color: var(--white);
+}
+
+/* Utility Classes */
+.glass {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+}
+
+.text-brand-gold {
+  color: var(--gold);
+}
+
+.bg-brand-navy {
+  background: var(--navy);
+}
+
+/* Transitions */
+.transition-luxury {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card Hover */
+.card-hover:hover {
+  border-color: var(--gold);
 }

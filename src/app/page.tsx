@@ -1,65 +1,208 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { HeroSection, QuickStartBar } from "@/components/hero/hero-section";
+import { Button, Card, CardBody, Badge } from "@/components/ui";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { ArrowRight, CheckCircle, Users, Building2, Calendar, Loader2 } from "lucide-react";
+
+// ============================================
+// HOMEPAGE
+// Bonram Rentals Portal
+// ============================================
+
+export default function HomePage() {
+  const products = useQuery(api.products.getAll);
+  const featured = products?.slice(0, 3);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <Header />
+
+      {/* Hero Section with Integrated Search */}
+      <HeroSection />
+
+      {/* Featured Equipment Section */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-navy mb-4">
+              Featured Equipment
+            </h2>
+            <p className="text-gray max-w-2xl mx-auto">
+              Our most popular items for events of all sizes. Browse our full catalog for more options.
+            </p>
+          </div>
+
+          {/* Loading State */}
+          {!featured && (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-gold" />
+            </div>
+          )}
+
+          {/* Products from Convex */}
+          {featured && featured.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featured.map((product) => (
+                <FeaturedEquipmentCard
+                  key={product._id}
+                  name={product.name}
+                  category={product.category}
+                  imageUrl={product.imageUrl}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {featured && featured.length === 0 && (
+            <p className="text-center text-gray py-8">
+              Equipment catalog coming soon.
+            </p>
+          )}
+
+          <div className="text-center mt-10">
+            <a href="/catalog">
+              <Button variant="outline" size="lg">
+                View Full Catalog
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </a>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-16 md:py-24 bg-mist">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-navy mb-4">
+              Why Choose Bonram?
+            </h2>
+            <p className="text-gray max-w-2xl mx-auto">
+              We bring institutional-grade reliability to every event, from intimate gatherings to large-scale functions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <WhyChooseCard
+              icon={<Building2 className="w-8 h-8" />}
+              title="Institutional Trust"
+              description="Trusted by Eskom, ArcelorMittal, and government departments since 2013."
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+            <WhyChooseCard
+              icon={<Users className="w-8 h-8" />}
+              title="Any Event Size"
+              description="From 50 to 5,000+ guests - we have the capacity and expertise."
+            />
+            <WhyChooseCard
+              icon={<Calendar className="w-8 h-8" />}
+              title="Reliable Delivery"
+              description="On-time delivery and setup, every time. Your event success is our priority."
+            />
+            <WhyChooseCard
+              icon={<CheckCircle className="w-8 h-8" />}
+              title="Quality Assured"
+              description="All equipment professionally maintained and cleaned to the highest standards."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Solid Navy */}
+      <section className="py-16 md:py-24 bg-navy border-t border-gold">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">
+            Ready to Plan Your Event?
+          </h2>
+          <p className="text-mist max-w-2xl mx-auto mb-8">
+            Get a personalized quote for your event. Our team will help you select the right equipment
+            for your needs and budget.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/quote">
+              <Button variant="gold" size="lg">
+                Request a Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </a>
+            <a href="tel:+27742748684">
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-navy">
+                Call Us: 074 274 8684
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </>
+  );
+}
+
+// ============================================
+// FEATURED EQUIPMENT CARD
+// ============================================
+
+interface FeaturedEquipmentCardProps {
+  name: string;
+  category: string;
+  imageUrl?: string;
+}
+
+function FeaturedEquipmentCard({ name, category, imageUrl }: FeaturedEquipmentCardProps) {
+  return (
+    <Card hover className="group">
+      <div className="relative aspect-video bg-mist overflow-hidden">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={name}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-navy flex items-center justify-center">
+            <span className="text-charcoal text-sm italic">No image available</span>
+          </div>
+        )}
+      </div>
+      <CardBody>
+        <p className="text-sm text-gold font-medium mb-1">{category}</p>
+        <h3 className="text-lg font-heading font-semibold text-navy mb-2">{name}</h3>
+        <div className="flex items-center justify-end">
+          <a href="/catalog">
+            <Button variant="ghost" size="sm" className="group-hover:text-gold">
+              View Details
+            </Button>
           </a>
         </div>
-      </main>
-    </div>
+      </CardBody>
+    </Card>
+  );
+}
+
+// ============================================
+// WHY CHOOSE CARD
+// ============================================
+
+interface WhyChooseCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+function WhyChooseCard({ icon, title, description }: WhyChooseCardProps) {
+  return (
+    <Card className="text-center p-6">
+      <div className="w-16 h-16 bg-mist rounded-sm flex items-center justify-center text-gold mx-auto mb-4 border border-gold">
+        {icon}
+      </div>
+      <h3 className="text-lg font-heading font-semibold text-navy mb-2">{title}</h3>
+      <p className="text-gray text-sm">{description}</p>
+    </Card>
   );
 }

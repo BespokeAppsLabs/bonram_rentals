@@ -3,15 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 8022",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@convex-dev/workos": "^0.0.1",
+    "@googlemaps/js-api-loader": "^2.0.2",
+    "@workos-inc/authkit-nextjs": "^2.14.0",
+    "clsx": "^2.1.1",
+    "convex": "^1.31.7",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.564.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-datepicker": "^9.1.0",
+    "react-dom": "19.2.3",
+    "recharts": "^3.7.0",
+    "resend": "^6.9.2",
+    "tailwind-merge": "^3.4.0",
+    "workos": "^0.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
