@@ -18,20 +18,22 @@ export async function POST(req: NextRequest) {
 
         if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
             // Production: Use @sparticuz/chromium
+            console.log('PDF: Launching Puppeteer with @sparticuz/chromium');
+            const executablePath = await chromium.executablePath();
+            console.log('PDF: Executable Path:', executablePath);
+
             browser = await puppeteer.launch({
                 args: chromium.args,
-                defaultViewport: { width: 1920, height: 1080 },
-                executablePath: await (chromium as any).executablePath?.() || await chromium.executablePath(),
+                defaultViewport: (chromium as any).defaultViewport || { width: 1920, height: 1080 },
+                executablePath: executablePath,
                 headless: (chromium as any).headless,
             });
         } else {
             // Development: Use local Chrome
-            // We use standard 'puppeteer' package which downloads a local chromium
-            // BUT we can use puppeteer-core causing it to look for executablePath
+            console.log('PDF: Launching Puppeteer with local Chrome');
             const { default: puppeteerLocal } = await import('puppeteer');
             browser = await puppeteerLocal.launch({
                 headless: true,
-                executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],
             });
         }
