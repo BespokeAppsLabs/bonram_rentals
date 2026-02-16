@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 
 // Force dynamic execution (optional but often needed for serverless)
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
         if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
             // Production: Use @sparticuz/chromium
-            console.log('PDF: Launching Puppeteer with @sparticuz/chromium');
+            console.log('PDF: Launching Puppeteer with @sparticuz/chromium-min');
             const executablePath = await chromium.executablePath();
             console.log('PDF: Executable Path:', executablePath);
 

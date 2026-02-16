@@ -11,7 +11,7 @@
   "dependencies": {
     "@convex-dev/workos": "^0.0.1",
     "@googlemaps/js-api-loader": "^2.0.2",
-    "@sparticuz/chromium": "^143.0.4",
+    "@sparticuz/chromium-min": "^143.0.4",
     "@workos-inc/authkit-nextjs": "^2.14.0",
     "clsx": "^2.1.1",
     "convex": "^1.31.7",
