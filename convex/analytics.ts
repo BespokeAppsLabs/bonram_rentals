@@ -77,10 +77,15 @@ export const getRevenueByCategory = query({
                 .collect();
 
             for (const item of items) {
-                const product = await ctx.db.get(item.productId);
-                if (product) {
-                    categoryRevenue[product.category] =
-                        (categoryRevenue[product.category] || 0) + item.lineTotal;
+                if (item.productId) {
+                    const product = await ctx.db.get(item.productId);
+                    if (product) {
+                        categoryRevenue[product.category] =
+                            (categoryRevenue[product.category] || 0) + item.lineTotal;
+                    }
+                } else {
+                    categoryRevenue["Manual"] =
+                        (categoryRevenue["Manual"] || 0) + item.lineTotal;
                 }
             }
         }
@@ -105,6 +110,7 @@ export const getTopProducts = query({
         const productMap = new Map<string, { count: number; revenue: number }>();
 
         for (const item of items) {
+            if (!item.productId) continue; // Skip manual items for top products report
             const key = item.productId as string;
             const existing = productMap.get(key) ?? { count: 0, revenue: 0 };
             existing.count += item.quantity;
@@ -112,21 +118,16 @@ export const getTopProducts = query({
             productMap.set(key, existing);
         }
 
-        // Look up product details using the typed productId from original items
-        const seen = new Set<string>();
+        // Look up product details
         const results = [];
+        for (const [productIdStr, data] of productMap.entries()) {
+            const product = await ctx.db.get(productIdStr as any);
+            if (!product || !('name' in product)) continue;
 
-        for (const item of items) {
-            const key = item.productId as string;
-            if (seen.has(key)) continue;
-            seen.add(key);
-
-            const data = productMap.get(key)!;
-            const product = await ctx.db.get(item.productId);
             results.push({
-                productId: key,
-                name: product?.name ?? "Unknown",
-                category: product?.category ?? "Unknown",
+                productId: productIdStr,
+                name: product.name,
+                category: (product as any).category ?? "Unknown",
                 totalOrdered: data.count,
                 totalRevenue: data.revenue,
             });

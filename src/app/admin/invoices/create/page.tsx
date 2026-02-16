@@ -1,112 +1,146 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
-import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminCreateInvoicePage() {
-    const quotations = useQuery(api.quotations.getAll);
+    const createStandalone = useMutation(api.quotations.createStandalone);
     const createInvoice = useMutation(api.invoices.create);
     const router = useRouter();
-    const [selectedQuotationId, setSelectedQuotationId] = useState("");
-    const [docType, setDocType] = useState<"invoice" | "quotation">("invoice");
-    const [dueDate, setDueDate] = useState(() => {
-        const d = new Date();
-        d.setDate(d.getDate() + 30);
-        return d.toISOString().split("T")[0];
-    });
-    const [saving, setSaving] = useState(false);
 
-    const confirmedQuotations = quotations?.filter((q) => q.status === "confirmed") ?? [];
-    const selectedQuotation = confirmedQuotations.find((q) => q._id === selectedQuotationId);
+    const [customerName, setCustomerName] = useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
+    const [docType, setDocType] = useState<"invoice" | "quotation">("quotation");
+    const [saving, setSaving] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedQuotationId) return;
+        if (!customerName || !customerEmail) return;
+
         setSaving(true);
         try {
-            await createInvoice({
-                quotationId: selectedQuotationId as any,
-                docType,
-                dueDate: new Date(dueDate).getTime(),
+            // 1. Create a blank quotation for this document
+            const quotationId = await createStandalone({
+                customerName,
+                customerEmail,
             });
-            router.push("/admin/invoices");
+
+            // 2. If it's an invoice, officially "generate" it now
+            if (docType === "invoice") {
+                const dueDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                const invoiceId = await createInvoice({
+                    quotationId,
+                    docType: "invoice",
+                    dueDate,
+                });
+                router.push(`/admin/invoices/${invoiceId}/studio`);
+            } else {
+                // If it's a quotation, go to the dedicated quotation studio
+                router.push(`/admin/quotations/${quotationId}/studio`);
+            }
         } catch (error) {
-            console.error("Failed to create invoice:", error);
+            console.error("Failed to create document:", error);
             setSaving(false);
         }
     };
 
     return (
-        <div className="max-w-xl">
+        <div className="max-w-2xl mx-auto py-12">
             <div className="flex items-center gap-4 mb-8">
-                <a href="/admin/invoices" className="p-2 text-gray hover:text-navy rounded-lg hover:bg-white transition-colors">
+                <Link href="/admin/invoices" className="p-2 text-gray hover:text-navy rounded-lg hover:bg-white transition-colors">
                     <ArrowLeft className="w-5 h-5" />
-                </a>
+                </Link>
                 <div>
-                    <h1 className="text-3xl font-heading font-bold text-navy">Create Invoice</h1>
-                    <p className="text-gray mt-1">Generate from a confirmed quotation</p>
+                    <h1 className="text-3xl font-heading font-bold text-navy">New Document</h1>
+                    <p className="text-gray mt-1">Start a professional document from scratch</p>
                 </div>
             </div>
 
-            {!quotations ? (
-                <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>
-            ) : (
-                <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-light p-6 space-y-5">
-                    <div>
-                        <label className="block text-sm font-medium text-navy mb-1.5">Document Type</label>
-                        <select value={docType} onChange={(e) => setDocType(e.target.value as any)}
-                            className="w-full px-4 py-2.5 border border-gray-light rounded-lg bg-white focus:ring-2 focus:ring-gold/50">
-                            <option value="invoice">Invoice</option>
-                            <option value="quotation">Quotation</option>
-                        </select>
+            <div className="grid grid-cols-1 gap-8">
+                <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-light p-8 shadow-xl shadow-navy/5 space-y-8">
+                    <div className="flex p-1 bg-mist rounded-xl gap-1">
+                        <button
+                            type="button"
+                            onClick={() => setDocType("quotation")}
+                            className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all ${docType === 'quotation' ? 'bg-navy text-white shadow-lg' : 'text-gray hover:bg-white'}`}
+                        >
+                            Quotation
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setDocType("invoice")}
+                            className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all ${docType === 'invoice' ? 'bg-gold text-white shadow-lg' : 'text-gray hover:bg-white'}`}
+                        >
+                            Tax Invoice
+                        </button>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-navy mb-1.5">Confirmed Quotation *</label>
-                        {confirmedQuotations.length === 0 ? (
-                            <p className="text-sm text-gray bg-mist p-3 rounded-lg">No confirmed quotations available.</p>
-                        ) : (
-                            <select value={selectedQuotationId} onChange={(e) => setSelectedQuotationId(e.target.value)} required
-                                className="w-full px-4 py-2.5 border border-gray-light rounded-lg bg-white focus:ring-2 focus:ring-gold/50">
-                                <option value="">Select a quotation...</option>
-                                {confirmedQuotations.map((q) => (
-                                    <option key={q._id} value={q._id}>
-                                        {q.customerContact.name} — {q.eventDetails.location} — {formatCurrency(q.total)}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-
-                    {selectedQuotation && (
-                        <div className="bg-mist p-4 rounded-lg text-sm space-y-1">
-                            <p><strong>Customer:</strong> {selectedQuotation.customerContact.name}</p>
-                            <p><strong>Event:</strong> {selectedQuotation.eventDetails.location}</p>
-                            <p><strong>Dates:</strong> {new Date(selectedQuotation.eventDetails.startDate).toLocaleDateString()} — {new Date(selectedQuotation.eventDetails.endDate).toLocaleDateString()}</p>
-                            <p><strong>Subtotal:</strong> {formatCurrency(selectedQuotation.subtotal)}</p>
-                            <p><strong>Total:</strong> {formatCurrency(selectedQuotation.total)}</p>
+                    <div className="space-y-6">
+                        <div>
+                            <label className="flex items-center gap-2 text-[10px] font-black text-navy uppercase tracking-[2px] mb-3 opacity-60">
+                                <UserPlus className="w-3 h-3 text-gold" />
+                                Customer Information
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="Client Name (e.g. John Doe)"
+                                    value={customerName}
+                                    onChange={(e) => setCustomerName(e.target.value)}
+                                    required
+                                    className="w-full px-5 py-4 bg-mist/50 border border-gray-light rounded-xl focus:bg-white focus:ring-4 focus:ring-gold/10 focus:border-gold outline-none transition-all placeholder:text-gray/50 font-medium"
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Email Address"
+                                    value={customerEmail}
+                                    onChange={(e) => setCustomerEmail(e.target.value)}
+                                    required
+                                    className="w-full px-5 py-4 bg-mist/50 border border-gray-light rounded-xl focus:bg-white focus:ring-4 focus:ring-gold/10 focus:border-gold outline-none transition-all placeholder:text-gray/50 font-medium"
+                                />
+                            </div>
                         </div>
-                    )}
-
-                    <div>
-                        <label className="block text-sm font-medium text-navy mb-1.5">Due Date</label>
-                        <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                            className="w-full px-4 py-2.5 border border-gray-light rounded-lg focus:ring-2 focus:ring-gold/50" />
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-light">
-                        <a href="/admin/invoices"><Button variant="outline" size="md" type="button">Cancel</Button></a>
-                        <Button variant="gold" size="md" type="submit" disabled={saving || !selectedQuotationId}>
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Create {docType === "invoice" ? "Invoice" : "Quotation"}</>}
+                    <div className="bg-gold/5 border border-gold/10 p-6 rounded-2xl">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-gold text-white rounded-xl shadow-lg shadow-gold/20">
+                                <Sparkles className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-navy mb-1">Instant Design Studio</h3>
+                                <p className="text-xs text-charcoal leading-relaxed opacity-70">
+                                    You'll be redirected to the Document Studio immediately after creation to add line items, customize templates, and finalize branding.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-light">
+                        <Link href="/admin/invoices" className="text-sm font-bold text-gray hover:text-navy transition-colors">
+                            Cancel
+                        </Link>
+                        <Button
+                            variant="gold"
+                            size="lg"
+                            type="submit"
+                            disabled={saving || !customerName || !customerEmail}
+                            className="min-w-[240px] shadow-xl shadow-gold/20"
+                        >
+                            {saving ? (
+                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                            ) : (
+                                <>Initialize {docType === "invoice" ? "Invoice" : "Quotation"}</>
+                            )}
                         </Button>
                     </div>
                 </form>
-            )}
+            </div>
         </div>
     );
 }

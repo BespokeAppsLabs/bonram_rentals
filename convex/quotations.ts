@@ -46,20 +46,11 @@ export const getById = query({
       .withIndex("by_quotation", (q) => q.eq("quotationId", args.id))
       .collect();
 
-    // Fetch product details for each item
-    const itemsWithProducts = await Promise.all(
-      items.map(async (item) => {
-        const product = await ctx.db.get(item.productId);
-        return { ...item, product };
-      })
-    );
-
-    return { ...quotation, items: itemsWithProducts };
+    return { ...quotation, items };
   },
 });
-
 /**
- * Get quotations for a user
+ * Get quotations for a specific user
  */
 export const getByUser = query({
   args: { userId: v.id("users") },
@@ -67,17 +58,11 @@ export const getByUser = query({
     return await ctx.db
       .query("quotations")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .order("desc")
       .collect();
   },
 });
-
-// ============================================
-// QUOTATION MUTATIONS
-// ============================================
-
 /**
- * Create a new draft quotation
+ * Create a new quotation with full details
  */
 export const create = mutation({
   args: {
@@ -100,8 +85,9 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
     return await ctx.db.insert("quotations", {
-      ...args,
       status: "draft",
+      eventDetails: args.eventDetails,
+      customerContact: args.customerContact,
       subtotal: 0,
       total: 0,
       createdAt: now,
@@ -111,40 +97,147 @@ export const create = mutation({
 });
 
 /**
- * Add item to quotation
+ * Create a new standalone quotation (starts as draft, no event details required initially)
+ */
+export const createStandalone = mutation({
+  args: {
+    customerName: v.string(),
+    customerEmail: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    return await ctx.db.insert("quotations", {
+      status: "draft",
+      eventDetails: {
+        location: "TBD",
+        guestCount: 0,
+        startDate: now,
+        endDate: now + 86400000, // +1 day default
+      },
+      customerContact: {
+        name: args.customerName,
+        email: args.customerEmail,
+        phone: "",
+      },
+      subtotal: 0,
+      total: 0,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+/**
+ * Add item to quotation (now supports manual entry)
  */
 export const addItem = mutation({
   args: {
     quotationId: v.id("quotations"),
-    productId: v.id("products"),
+    productId: v.optional(v.id("products")),
+    description: v.string(),
+    uom: v.optional(v.string()),
     quantity: v.number(),
+    priceAtTime: v.number(),
   },
   handler: async (ctx, args) => {
-    const product = await ctx.db.get(args.productId);
-    if (!product) throw new Error("Product not found");
+    const { quotationId, ...itemData } = args;
+    const lineTotal = itemData.priceAtTime * itemData.quantity;
 
-    const quotation = await ctx.db.get(args.quotationId);
-    if (!quotation) throw new Error("Quotation not found");
-
-    // Calculate line total
-    const days = Math.ceil(
-      (quotation.eventDetails.endDate - quotation.eventDetails.startDate) / (1000 * 60 * 60 * 24)
-    ) || 1;
-    const lineTotal = product.dailyRate * args.quantity * days;
-
-    // Add item
     await ctx.db.insert("quotationItems", {
-      quotationId: args.quotationId,
-      productId: args.productId,
-      quantity: args.quantity,
-      priceAtTime: product.dailyRate,
+      quotationId,
+      ...itemData,
       lineTotal,
     });
 
-    // Update quotation totals
-    await updateQuotationTotals(ctx, args.quotationId);
+    await updateQuotationTotals(ctx, quotationId);
   },
 });
+
+/**
+ * Batch sync document data and line items
+ */
+export const syncDocumentData = mutation({
+  args: {
+    id: v.id("quotations"),
+    customerContact: v.optional(v.object({
+      name: v.string(),
+      email: v.string(),
+      phone: v.string(),
+      company: v.optional(v.string()),
+      address: v.optional(v.string()),
+      vatNumber: v.optional(v.string()),
+    })),
+    logistics: v.optional(v.object({
+      vendorNo: v.optional(v.string()),
+      poNumber: v.optional(v.string()),
+      grNumber: v.optional(v.string()),
+    })),
+    banking: v.optional(v.object({
+      bankName: v.string(),
+      accountNumber: v.string(),
+      branchCode: v.string(),
+    })),
+    lineItems: v.array(v.object({
+      id: v.optional(v.string()), // Existing ID or undefined for new
+      description: v.string(),
+      uom: v.optional(v.string()),
+      quantity: v.number(),
+      unitPrice: v.number(),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const { id, customerContact, logistics, banking, lineItems } = args;
+    const now = Date.now();
+
+    // 1. Update metadata
+    const updates: any = { updatedAt: now };
+    if (customerContact) updates.customerContact = customerContact;
+    if (logistics) updates.logistics = logistics;
+    if (banking) updates.banking = banking;
+
+    if (Object.keys(updates).length > 1) { // more than just timestamp
+      await ctx.db.patch(id, updates);
+    }
+
+    // 2. Clear existing items and replace (simple sync)
+    // Alternatively, we could do a smart diff, but for the studio replace is safer/easier
+    const existingItems = await ctx.db
+      .query("quotationItems")
+      .withIndex("by_quotation", (q) => q.eq("quotationId", id))
+      .collect();
+
+    for (const item of existingItems) {
+      await ctx.db.delete(item._id);
+    }
+
+    let subtotal = 0;
+    for (const item of lineItems) {
+      const lineTotal = item.unitPrice * item.quantity;
+      subtotal += lineTotal;
+      await ctx.db.insert("quotationItems", {
+        quotationId: id,
+        description: item.description,
+        uom: item.uom,
+        quantity: item.quantity,
+        priceAtTime: item.unitPrice,
+        lineTotal,
+      });
+    }
+
+    // 3. Update totals
+    const quotation = await ctx.db.get(id);
+    const deliveryFee = quotation?.deliveryFee ?? 0;
+    const discount = quotation?.discount ?? 0;
+    const total = subtotal + deliveryFee - discount;
+
+    await ctx.db.patch(id, {
+      subtotal,
+      total,
+      updatedAt: now,
+    });
+  },
+});
+
 
 /**
  * Remove item from quotation
@@ -251,6 +344,28 @@ export const updatePricing = mutation({
 });
 
 /**
+ * Update document settings (template and branding)
+ */
+export const updateSettings = mutation({
+  args: {
+    id: v.id("quotations"),
+    templateStyle: v.optional(v.string()),
+    branding: v.optional(v.object({
+      logoX: v.number(),
+      logoY: v.number(),
+      logoScale: v.number(),
+      logoOpacity: v.number(),
+      logoIsBack: v.boolean(),
+      logoUrl: v.optional(v.string()),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    await ctx.db.patch(id, updates);
+  },
+});
+
+/**
  * Update event details
  */
 export const updateEventDetails = mutation({
@@ -302,7 +417,7 @@ async function updateQuotationTotals(ctx: any, quotationId: any) {
     .collect();
 
   const subtotal = items.reduce((sum: number, item: any) => sum + item.lineTotal, 0);
-  
+
   const quotation = await ctx.db.get(quotationId);
   const deliveryFee = quotation?.deliveryFee ?? 0;
   const discount = quotation?.discount ?? 0;

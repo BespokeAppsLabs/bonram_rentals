@@ -91,7 +91,24 @@ export default defineSchema({
       email: v.string(),
       phone: v.string(),
       company: v.optional(v.string()),
+      address: v.optional(v.string()),
+      vatNumber: v.optional(v.string()),
     }),
+
+    // Logistics & Admin
+    logistics: v.optional(v.object({
+      vendorNo: v.optional(v.string()),
+      poNumber: v.optional(v.string()),
+      grNumber: v.optional(v.string()),
+      invoiceNumber: v.optional(v.string()), // Distinct from system invoice number if needed
+    })),
+
+    // Banking Details Override
+    banking: v.optional(v.object({
+      bankName: v.string(),
+      accountNumber: v.string(),
+      branchCode: v.string(),
+    })),
 
     // Pricing
     subtotal: v.number(),
@@ -105,6 +122,17 @@ export default defineSchema({
 
     createdAt: v.number(),
     updatedAt: v.number(),
+
+    // Document Studio Fields
+    templateStyle: v.optional(v.string()), // e.g. "bonram-financial", "modern-minimal"
+    branding: v.optional(v.object({
+      logoX: v.number(),
+      logoY: v.number(),
+      logoScale: v.number(),
+      logoOpacity: v.number(),
+      logoIsBack: v.boolean(),
+      logoUrl: v.optional(v.string()),
+    })),
   })
     .index("by_status", ["status"])
     .index("by_user", ["userId"])
@@ -116,7 +144,9 @@ export default defineSchema({
 
   quotationItems: defineTable({
     quotationId: v.id("quotations"),
-    productId: v.id("products"),
+    productId: v.optional(v.id("products")),
+    description: v.string(), // Name/Description of the service or product
+    uom: v.optional(v.string()), // Unit of Measure (e.g. "day", "unit", "set")
     quantity: v.number(),
     priceAtTime: v.number(), // Snapshot of rate when added
     lineTotal: v.number(),
@@ -162,6 +192,41 @@ export default defineSchema({
       v.literal("paid")
     ),
     createdAt: v.number(),
+
+    // Customer Snapshot
+    customerContact: v.object({
+      name: v.string(),
+      email: v.string(),
+      phone: v.string(),
+      company: v.optional(v.string()),
+      address: v.optional(v.string()),
+      vatNumber: v.optional(v.string()),
+    }),
+
+    // Logistics & Admin
+    logistics: v.optional(v.object({
+      vendorNo: v.optional(v.string()),
+      poNumber: v.optional(v.string()),
+      grNumber: v.optional(v.string()),
+    })),
+
+    // Banking Details Override
+    banking: v.optional(v.object({
+      bankName: v.string(),
+      accountNumber: v.string(),
+      branchCode: v.string(),
+    })),
+
+    // Document Studio Fields
+    templateStyle: v.optional(v.string()),
+    branding: v.optional(v.object({
+      logoX: v.number(),
+      logoY: v.number(),
+      logoScale: v.number(),
+      logoOpacity: v.number(),
+      logoIsBack: v.boolean(),
+      logoUrl: v.optional(v.string()),
+    })),
   })
     .index("by_quotation", ["quotationId"])
     .index("by_status", ["status"]),

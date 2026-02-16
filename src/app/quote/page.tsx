@@ -8,14 +8,14 @@ import { Button, Input, Card, CardBody, Badge } from "@/components/ui";
 import { formatCurrency, formatDateRange, calculateDays } from "@/lib/utils";
 import { useProducts } from "@/hooks/use-products";
 import { useCreateQuotation, useAddQuotationItem } from "@/hooks/use-quotations";
-import { 
-  MapPin, 
-  Users, 
-  Calendar, 
-  Edit2, 
-  Minus, 
-  Plus, 
-  Trash2, 
+import {
+  MapPin,
+  Users,
+  Calendar,
+  Edit2,
+  Minus,
+  Plus,
+  Trash2,
   Send,
   ArrowLeft,
   CheckCircle,
@@ -97,7 +97,7 @@ export default function QuotePage() {
   // Get recommendations based on guest count
   const recommendations = useMemo(() => {
     if (!products) return [];
-    
+
     return products
       .filter((p) => {
         // Filter out already selected items
@@ -168,7 +168,7 @@ export default function QuotePage() {
   // Submit quote
   const handleSubmit = async () => {
     if (quoteItems.length === 0) return;
-    
+
     setIsSubmitting(true);
     try {
       // Create quotation in Convex
@@ -194,6 +194,8 @@ export default function QuotePage() {
           quotationId,
           productId: item.productId as any,
           quantity: item.quantity,
+          description: item.productName,
+          priceAtTime: item.dailyRate,
         });
       }
 
@@ -253,14 +255,14 @@ export default function QuotePage() {
   return (
     <>
       <Header />
-      
+
       <main className="min-h-screen bg-mist">
         {/* Page Header */}
         <div className="bg-navy py-6 md:py-8">
           <div className="container mx-auto px-4">
             <div className="flex items-center gap-4">
-              <a 
-                href="/catalog" 
+              <a
+                href="/catalog"
                 className="text-white/70 hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />

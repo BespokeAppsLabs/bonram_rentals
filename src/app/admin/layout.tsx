@@ -15,6 +15,7 @@ import {
     FileText,
     User,
     ShoppingBag,
+    FolderEdit,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,6 +31,7 @@ import { useState } from "react";
 const adminNavItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products", icon: Package },
+    { href: "/admin/documents", label: "Documents", icon: FolderEdit },
     { href: "/admin/invoices", label: "Invoices", icon: FileText },
     { href: "/admin/staff", label: "Staff", icon: Users },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },

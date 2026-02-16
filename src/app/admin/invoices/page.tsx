@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui";
-import { Plus, Loader2, Eye, FileText } from "lucide-react";
+import { Plus, Loader2, Eye, FileText, Palette, FileSearch } from "lucide-react";
 import Link from "next/link";
 
 const statusColors: Record<string, string> = {
@@ -33,8 +33,8 @@ export default function AdminInvoicesPage() {
                     <h1 className="text-3xl font-heading font-bold text-navy">Invoices</h1>
                     <p className="text-gray mt-1">{invoices.length} total invoices</p>
                 </div>
-                <Link href="/admin/invoices/create">
-                    <Button variant="gold" size="md"><Plus className="w-4 h-4 mr-2" /> Create Invoice</Button>
+                <Link href="/admin/documents">
+                    <Button variant="gold" size="md"><Plus className="w-4 h-4 mr-2" /> Create Document</Button>
                 </Link>
             </div>
 
@@ -73,10 +73,16 @@ export default function AdminInvoicesPage() {
                                         </select>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <Link href={`/admin/invoices/${inv._id}`}
-                                            className="inline-flex items-center gap-1.5 text-sm text-gold hover:text-gold/80 font-medium">
-                                            <Eye className="w-4 h-4" /> View
-                                        </Link>
+                                        <div className="flex items-center justify-end gap-3">
+                                            <Link href={`/admin/invoices/${inv._id}/studio`}
+                                                className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                                <Palette className="w-4 h-4" /> Design
+                                            </Link>
+                                            <Link href={`/admin/invoices/${inv._id}`}
+                                                className="inline-flex items-center gap-1.5 text-sm text-gold hover:text-gold/80 font-medium border-l border-gray-light pl-3">
+                                                <Eye className="w-4 h-4" /> View
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
