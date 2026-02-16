@@ -155,6 +155,7 @@ export const DocumentStudio: React.FC<Props> = ({ initialData, quotationId, invo
                         filename={`${data.type === DocumentType.INVOICE ? 'Invoice' : 'Quote'}-${data.invoiceNumber || 'Draft'}.pdf`}
                         variant="outline"
                         className="w-full border-slate-200 hover:bg-slate-50 text-slate-600 font-bold h-12 rounded-xl"
+                        data={data}
                     />
                 </div>
             </div>

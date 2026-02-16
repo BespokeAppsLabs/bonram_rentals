@@ -91,6 +91,7 @@ export default function AdminInvoiceViewPage() {
                         filename={pdfFilename}
                         variant="primary"
                         className="bg-navy hover:bg-navy/90"
+                        data={docData}
                     />
                 </div>
             </div>

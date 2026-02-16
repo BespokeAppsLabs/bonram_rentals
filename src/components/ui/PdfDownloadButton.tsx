@@ -5,12 +5,17 @@ import { Button } from '@/components/ui';
 import { Download, Loader2 } from 'lucide-react';
 
 
+import { pdf } from '@react-pdf/renderer';
+import { FinancialPdfTemplate } from '../invoice/pdf-templates/FinancialPdfTemplate';
+import { DocumentData, TemplateStyle } from '@/types/document';
+
 interface PdfDownloadButtonProps {
-    targetRef: React.RefObject<HTMLElement | null>;
+    targetRef?: React.RefObject<HTMLElement | null>; // Made optional for client-side only mode
     filename: string;
     label?: string;
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
     className?: string;
+    data?: DocumentData; // New prop for client-side generation
 }
 
 export const PdfDownloadButton: React.FC<PdfDownloadButtonProps> = ({
@@ -18,20 +23,37 @@ export const PdfDownloadButton: React.FC<PdfDownloadButtonProps> = ({
     filename,
     label = "Download PDF",
     variant = "primary",
-    className
+    className,
+    data
 }) => {
     const [isGenerating, setIsGenerating] = useState(false);
 
     const handleDownload = async () => {
-        if (!targetRef?.current) {
-            console.error("Target element not found");
-            alert("Error: Target element not found for PDF generation.");
-            return;
-        }
-
         setIsGenerating(true);
 
         try {
+            // New Client-Side Generation for Financial Templates
+            if (data && data.templateStyle === TemplateStyle.BONRAM_FINANCIAL) {
+                console.log("Generating PDF client-side...");
+                const blob = await pdf(<FinancialPdfTemplate data={data} />).toBlob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                return;
+            }
+
+            // Fallback to Server-Side Generation for other templates or missing data
+            if (!targetRef?.current) {
+                console.error("Target element not found for fallback generation");
+                alert("Error: Target element not found for PDF generation.");
+                return;
+            }
+
             // 1. Capture Styles (tailored for Next.js/Tailwind)
             const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
                 .map(node => {
