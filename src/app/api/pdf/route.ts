@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
+
+// Force dynamic execution (optional but often needed for serverless)
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {
@@ -10,32 +14,44 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing HTML content' }, { status: 400 });
         }
 
-        // Launch Puppeteer with system Chrome
-        const browser = await puppeteer.launch({
-            headless: true,
-            executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
+        let browser;
+
+        if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+            // Production: Use @sparticuz/chromium
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                defaultViewport: { width: 1920, height: 1080 },
+                executablePath: await (chromium as any).executablePath?.() || await chromium.executablePath(),
+                headless: (chromium as any).headless,
+            });
+        } else {
+            // Development: Use local Chrome
+            // We use standard 'puppeteer' package which downloads a local chromium
+            // BUT we can use puppeteer-core causing it to look for executablePath
+            const { default: puppeteerLocal } = await import('puppeteer');
+            browser = await puppeteerLocal.launch({
+                headless: true,
+                executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            });
+        }
 
         const page = await browser.newPage();
 
-        // setContent is robust for raw HTML
         await page.setContent(html, {
-            waitUntil: 'networkidle0', // Wait for external resources (images, fonts)
+            waitUntil: 'networkidle0',
         });
 
-        // Generates a PDF with 'print' media type to respect page breaks
         await page.emulateMediaType('print');
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            margin: { top: '0', right: '0', bottom: '0', left: '0' }, // Full bleed
+            margin: { top: '0', right: '0', bottom: '0', left: '0' },
         });
 
         await browser.close();
 
-        // Return the PDF
         return new NextResponse(pdfBuffer as any, {
             headers: {
                 'Content-Type': 'application/pdf',
