@@ -1,0 +1,23 @@
+{
+  "version": "0.6.9",
+  "notes": "",
+  "pub_date": "2026-03-05T19:53:08.328Z",
+  "platforms": {
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWitUQURWSXBwVnZ1TzZzZFFJMkhqZkNhZnNIWmtIbTB5UHYvTndqN2pQWTJRaThDMGR3M0RZb3lyRnJIWG1rZ1BVejlSd3czWkJyTThhbStaTmVGZnZUWUNlekNnd1E0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzcyNzQwMjk5CWZpbGU6T3BlblVzYWdlLmFwcC50YXIuZ3oKWi8vVEFpUDlQQUltSGJKQm9FUXF5UjZGeUF5YmhOdjhyTFcrMFhmWU9mZTZuUFZzY3NpR3k3bUtvVjltM0o0VWE3d0VTajEwTlAyRitoUnMrOXExQkE9PQo=",
+      "url": "https://github.com/robinebers/openusage/releases/download/v0.6.9/OpenUsage_x64.app.tar.gz"
+    },
+    "darwin-x86_64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWitUQURWSXBwVnZ1TzZzZFFJMkhqZkNhZnNIWmtIbTB5UHYvTndqN2pQWTJRaThDMGR3M0RZb3lyRnJIWG1rZ1BVejlSd3czWkJyTThhbStaTmVGZnZUWUNlekNnd1E0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzcyNzQwMjk5CWZpbGU6T3BlblVzYWdlLmFwcC50YXIuZ3oKWi8vVEFpUDlQQUltSGJKQm9FUXF5UjZGeUF5YmhOdjhyTFcrMFhmWU9mZTZuUFZzY3NpR3k3bUtvVjltM0o0VWE3d0VTajEwTlAyRitoUnMrOXExQkE9PQo=",
+      "url": "https://github.com/robinebers/openusage/releases/download/v0.6.9/OpenUsage_x64.app.tar.gz"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWitUQURWSXBwVnVWb1NNRHhQdVBMUUx4YmFmWGVEY1lWV3NFR1ExWE8xOUNQYWdyS2Nia25MN2RGaU5EL1NPOW1qeEdBT05rc2ZMSHBhOTkxc0lKMk5iaVJFem4yY3dRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzcyNzQwMzgzCWZpbGU6T3BlblVzYWdlLmFwcC50YXIuZ3oKRmVYd2hJOEtpQlozcTgweU5mYzZUSmV4dXRtUWtwd3YxVllnUTFwcXUwaW0zWVZibGhYM2hKelM2ZHgrQ3BUNmhaa0owN3hxK0VWZHp5a2RHRkxmQlE9PQo=",
+      "url": "https://github.com/robinebers/openusage/releases/download/v0.6.9/OpenUsage_aarch64.app.tar.gz"
+    },
+    "darwin-aarch64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWitUQURWSXBwVnVWb1NNRHhQdVBMUUx4YmFmWGVEY1lWV3NFR1ExWE8xOUNQYWdyS2Nia25MN2RGaU5EL1NPOW1qeEdBT05rc2ZMSHBhOTkxc0lKMk5iaVJFem4yY3dRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzcyNzQwMzgzCWZpbGU6T3BlblVzYWdlLmFwcC50YXIuZ3oKRmVYd2hJOEtpQlozcTgweU5mYzZUSmV4dXRtUWtwd3YxVllnUTFwcXUwaW0zWVZibGhYM2hKelM2ZHgrQ3BUNmhaa0owN3hxK0VWZHp5a2RHRkxmQlE9PQo=",
+      "url": "https://github.com/robinebers/openusage/releases/download/v0.6.9/OpenUsage_aarch64.app.tar.gz"
+    }
+  }
+}
