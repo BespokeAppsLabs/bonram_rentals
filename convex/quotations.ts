@@ -45,6 +45,9 @@ async function requireQuotationAccess(
   throw new Error("Insufficient permissions");
 }
 
+const MAX_RENTAL_DAYS = 365;
+const MAX_QUOTE_ITEMS = 50;
+
 function validateEventDetails(eventDetails: {
   location: string;
   guestCount: number;
@@ -55,11 +58,18 @@ function validateEventDetails(eventDetails: {
   if (!Number.isInteger(eventDetails.guestCount) || eventDetails.guestCount < 1) {
     throw new Error("Guest count must be at least 1");
   }
+  if (!Number.isFinite(eventDetails.startDate) || !Number.isFinite(eventDetails.endDate)) {
+    throw new Error("Invalid event dates");
+  }
   if (eventDetails.startDate < Date.now() - 86_400_000) {
     throw new Error("Event start date cannot be in the past");
   }
   if (eventDetails.endDate < eventDetails.startDate) {
     throw new Error("Event end date must be after start date");
+  }
+  const durationDays = (eventDetails.endDate - eventDetails.startDate) / 86_400_000;
+  if (durationDays > MAX_RENTAL_DAYS) {
+    throw new Error(`Rental period cannot exceed ${MAX_RENTAL_DAYS} days`);
   }
 }
 
@@ -514,6 +524,7 @@ export const submitQuote = mutation({
     validateEventDetails(args.eventDetails);
     validateContact(args.customerContact);
     if (args.items.length === 0) throw new Error("Select at least one item");
+    if (args.items.length > MAX_QUOTE_ITEMS) throw new Error(`Quotes are limited to ${MAX_QUOTE_ITEMS} line items`);
 
     // Validate each item individually before aggregating (catches negative quantities)
     for (const item of args.items) {
@@ -568,7 +579,8 @@ export const submitQuote = mutation({
     }
 
     const subtotal = validatedItems.reduce((sum, item) => sum + item.lineTotal, 0);
-    const publicReference = `BR-${new Date(now).getFullYear()}-${now.toString(36).toUpperCase()}`;
+    const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    const publicReference = `BR-${new Date(now).getFullYear()}-${now.toString(36).toUpperCase()}-${rand}`;
     const quotationId = await ctx.db.insert("quotations", {
       userId: user?._id,
       publicReference,
