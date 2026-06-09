@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { formatCurrency } from "@/lib/utils";
 import {
     Package,
@@ -22,7 +21,6 @@ import Link from "next/link";
 // ============================================
 
 export default function DashboardPage() {
-    const { user: authUser } = useAuth();
     // Use getUserSession for consistent auth handling (same as layout.tsx)
     const session = useQuery(api.users.getUserSession);
     const dbUser = session?.user;
@@ -41,7 +39,7 @@ export default function DashboardPage() {
         return <AdminDashboard />;
     }
 
-    return <CustomerDashboard userName={dbUser.name ?? authUser?.firstName ?? "there"} />;
+    return <CustomerDashboard userName={dbUser.name ?? "there"} />;
 }
 
 // ============================================

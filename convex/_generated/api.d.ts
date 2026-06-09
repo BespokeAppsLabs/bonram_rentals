@@ -11,12 +11,12 @@
 import type * as analytics from "../analytics.js";
 import type * as files from "../files.js";
 import type * as invoices from "../invoices.js";
+import type * as notifications from "../notifications.js";
 import type * as products from "../products.js";
 import type * as quotations from "../quotations.js";
 import type * as recommendations from "../recommendations.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
-import type * as workos_admin from "../workos_admin.js";
 
 import type {
   ApiFromModules,
@@ -28,12 +28,12 @@ declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   files: typeof files;
   invoices: typeof invoices;
+  notifications: typeof notifications;
   products: typeof products;
   quotations: typeof quotations;
   recommendations: typeof recommendations;
   seed: typeof seed;
   users: typeof users;
-  workos_admin: typeof workos_admin;
 }>;
 
 /**

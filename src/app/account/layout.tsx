@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
+import { useUser } from "@clerk/nextjs";
 import { User, FileText, Package, LogOut, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,11 +14,11 @@ const navItems = [
 ];
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
-    const { user, loading } = useAuth();
+    const { user, isLoaded } = useUser();
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    if (loading) {
+    if (!isLoaded) {
         return (
             <div className="min-h-screen bg-mist flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-gold border-t-transparent" />

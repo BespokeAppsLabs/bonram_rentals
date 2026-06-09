@@ -1,39 +1,23 @@
 "use client";
 
-import { useConvexAuth, useMutation, useAction } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
-/**
- * UserSync Component
- * 
- * Automatically synchronizes the authenticated WorkOS user with the Convex database.
- * This handles "auto-provisioning" by calling the `storeUser` mutation upon login.
- */
 export function UserSync() {
-    const { isAuthenticated, isLoading } = useConvexAuth();
-    const syncUser = useAction(api.users.syncUserWithWorkOS);
-    const [synced, setSynced] = useState(false);
+    const { isSignedIn, isLoaded, user } = useUser();
+    const syncUser = useAction(api.users.syncUserWithClerk);
+    const syncedUserId = useRef<string | null>(null);
 
     useEffect(() => {
-        // Only run sync if authenticated, not loading, and not already synced in this session
-        if (isAuthenticated && !isLoading && !synced) {
-            const performSync = async () => {
-                try {
-                    await syncUser();
-                    setSynced(true);
-                } catch (error) {
-                    console.error("[UserSync] Failed to synchronize user:", error);
-                }
-            };
-            performSync();
+        if (isSignedIn && isLoaded && user && syncedUserId.current !== user.id) {
+            syncUser()
+                .then(() => { syncedUserId.current = user.id; })
+                .catch((error) => console.error("[UserSync] Failed to sync:", error));
         }
+        if (!isSignedIn) syncedUserId.current = null;
+    }, [isSignedIn, isLoaded, user, syncUser]);
 
-        // Reset sync state if user logs out
-        if (!isAuthenticated) {
-            setSynced(false);
-        }
-    }, [isAuthenticated, isLoading, synced, syncUser]);
-
-    return null; // This component doesn't render anything
+    return null;
 }

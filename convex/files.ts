@@ -1,5 +1,6 @@
-import { query, mutation, action } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./auth.helpers";
 
 // ============================================
 // FILE STORAGE - Image Upload & Retrieval
@@ -12,6 +13,7 @@ import { v } from "convex/values";
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // This will return a URL that the client can use to upload a file
     return await ctx.storage.generateUploadUrl();
   },
@@ -24,6 +26,7 @@ export const generateUploadUrl = mutation({
 export const getFileUrl = query({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     return await ctx.storage.getUrl(args.storageId);
   },
 });
@@ -44,6 +47,7 @@ export const deleteFile = mutation({
 export const listFiles = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     // Note: Convex doesn't have a direct list method
     // This would typically be done via a separate tracking table
     // For now, return empty as we track images via product.imageStorageId

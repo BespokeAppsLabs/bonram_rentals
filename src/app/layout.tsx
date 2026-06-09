@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Montserrat } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/lib/convex-provider";
-
-// ============================================
-// FONT CONFIGURATION
-// Institutional Luxury Design System
-// ============================================
+import { UserSync } from "@/components/auth/UserSync";
 
 const bodoniModa = Bodoni_Moda({
   subsets: ["latin"],
@@ -21,11 +18,8 @@ const montserrat = Montserrat({
   weight: ["400", "500", "600", "700"],
 });
 
-// ============================================
-// METADATA
-// ============================================
-
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://bonramrentals.co.za"),
   title: "Bonram Rentals | Professional Event Equipment Hire",
   description: "Presidential-grade event equipment hire trusted by South Africa's biggest institutions. Tents, sanitation, power, audio, and more for weddings, corporate events, and government functions.",
   keywords: ["event hire", "equipment rental", "tents", "sanitation", "generators", "sound systems", "South Africa", "Lephalale"],
@@ -33,16 +27,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Bonram Rentals | Professional Event Equipment Hire",
     description: "Presidential-grade event equipment hire trusted by South Africa's biggest institutions.",
+    url: "https://bonramrentals.co.za",
+    siteName: "Bonram Rentals",
     type: "website",
     locale: "en_ZA",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bonram Rentals | Professional Event Equipment Hire",
+    description: "Presidential-grade event equipment hire trusted by South Africa's biggest institutions.",
+  },
 };
-
-import { UserSync } from "@/components/auth/UserSync";
-
-// ============================================
-// ROOT LAYOUT
-// ============================================
 
 export default function RootLayout({
   children,
@@ -50,15 +45,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bodoniModa.variable} ${montserrat.variable}`}>
-      <body className="font-body antialiased">
-        <ConvexClientProvider>
-          <UserSync />
-          <main className="min-h-screen">
-            {children}
-          </main>
-        </ConvexClientProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${bodoniModa.variable} ${montserrat.variable}`}>
+        <body className="font-body antialiased">
+          <ConvexClientProvider>
+            <UserSync />
+            <main className="min-h-screen">
+              {children}
+            </main>
+          </ConvexClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

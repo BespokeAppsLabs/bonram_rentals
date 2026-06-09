@@ -1,7 +1,7 @@
 import { query, mutation, action, internalMutation } from "./_generated/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { requireAdmin, requireSuperAdmin } from "./auth.helpers";
+import { getAuthUser, requireAdmin, requireSuperAdmin } from "./auth.helpers";
 import { Id } from "./_generated/dataModel";
 
 // ============================================
@@ -16,6 +16,7 @@ import { Id } from "./_generated/dataModel";
 export const isStaffEmail = query({
     args: { email: v.string() },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         const user = await ctx.db
             .query("users")
             .withIndex("by_email", (q) => q.eq("email", args.email.toLowerCase()))
@@ -41,6 +42,7 @@ export const getAll = query({
 export const getByToken = query({
     args: { tokenIdentifier: v.string() },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         return await ctx.db
             .query("users")
             .withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier))
@@ -186,53 +188,20 @@ export const linkUser = internalMutation({
 });
 
 /**
- * Sync user identity with WorkOS (Action)
- * Fetches full profile from WorkOS if missing in identity
+ * Sync authenticated Clerk user into Convex database.
+ * Clerk JWT includes email and name directly — no external API call needed.
  */
-export const syncUserWithWorkOS = action({
+export const syncUserWithClerk = action({
     args: {},
     handler: async (ctx): Promise<Id<"users">> => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) throw new Error("Unauthenticated");
 
-        let email = identity.email;
-        let name = identity.name;
+        const email = identity.email;
+        const name = identity.name;
 
-        // If identity is missing email (JWT claims issue), fetch from WorkOS API
-        if (!email) {
-            console.log("[users:syncUserWithWorkOS] Email missing in identity, fetching from WorkOS API...");
-            const apiKey = process.env.WORKOS_API_KEY;
-            if (!apiKey) throw new Error("WORKOS_API_KEY missing");
+        if (!email) throw new Error("Could not determine user email from Clerk identity");
 
-            // Extract User ID from subject
-            const userId = identity.subject;
-
-            try {
-                const response = await fetch(`https://api.workos.com/user_management/users/${userId}`, {
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error("[users:syncUserWithWorkOS] WorkOS API Error:", response.status, errorText);
-                    throw new Error(`WorkOS API responded with ${response.status}`);
-                }
-
-                const user = await response.json();
-                email = user.email;
-                name = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || undefined;
-                console.log("[users:syncUserWithWorkOS] Successfully fetched user from WorkOS API:", email);
-            } catch (error) {
-                console.error("[users:syncUserWithWorkOS] Error fetching user from WorkOS:", error);
-                throw new Error("Could not verify user identity with WorkOS");
-            }
-        }
-
-        if (!email) throw new Error("Could not determine user email");
-
-        // Link the user in Convex
         return await ctx.runMutation(internal.users.linkUser, {
             email,
             name,
@@ -251,6 +220,7 @@ export const getOrCreateUser = mutation({
         tokenIdentifier: v.string(),
     },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         // Check if user exists
         const existing = await ctx.db
             .query("users")
@@ -314,7 +284,7 @@ export const createInvitation = mutation({
         invitedBy: v.id("users"),
     },
     handler: async (ctx, args) => {
-        await requireAdmin(ctx);
+        const inviter = await requireAdmin(ctx);
         // Check for existing invitation
         const existing = await ctx.db
             .query("invitations")
@@ -339,7 +309,7 @@ export const createInvitation = mutation({
             email: args.email,
             role: args.role,
             status: "pending",
-            invitedBy: args.invitedBy,
+            invitedBy: inviter._id,
             createdAt: Date.now(),
         });
 
@@ -387,6 +357,11 @@ export const updateProfile = mutation({
     },
     handler: async (ctx, args) => {
         const { id, ...updates } = args;
+        const currentUser = await getAuthUser(ctx);
+        if (!currentUser) throw new Error("Authentication required");
+        if (currentUser.role !== "admin" && currentUser.role !== "staff" && currentUser._id !== id) {
+            throw new Error("Insufficient permissions");
+        }
         const user = await ctx.db.get(id);
         if (!user) throw new Error("User not found");
 
@@ -410,6 +385,7 @@ export const updateProfile = mutation({
 export const cleanupUsers = mutation({
     args: {},
     handler: async (ctx) => {
+        await requireSuperAdmin(ctx);
         const users = await ctx.db.query("users").collect();
         const toDelete = users.filter(u => u.name === "Anonymous");
         for (const user of toDelete) {

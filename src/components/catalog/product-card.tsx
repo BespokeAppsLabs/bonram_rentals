@@ -5,6 +5,8 @@ import { Card, CardBody, Badge, Button } from "@/components/ui";
 
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
 
 // ============================================
 // PRODUCT CARD COMPONENT
@@ -118,14 +120,23 @@ export function ProductCard({ product, onAddToQuote, className }: ProductCardPro
         <p className="text-sm text-gold font-medium mb-1">{product.category}</p>
         <h3 className="text-lg font-heading font-semibold text-navy mb-1">{product.name}</h3>
         <p className="text-gray text-sm mb-3 line-clamp-2 flex-1">{product.description}</p>
-
-
+        <Link href={`/catalog/${product._id}`} className="text-sm font-semibold text-navy hover:text-gold mb-4">
+          View details
+        </Link>
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray">Starting from</p>
+            <p className="text-xl font-bold text-navy">{formatCurrency(product.dailyRate)}<span className="text-xs font-normal text-gray"> / day</span></p>
+          </div>
+          <p className="text-xs text-gray">{product.availableQuantity ?? product.totalStock} available</p>
+        </div>
 
         {/* Quantity Selector & Add Button */}
         <div className="flex items-center gap-3">
           <div className="flex items-center border border-gray-light rounded-lg">
             <button
               onClick={handleDecrement}
+              aria-label={`Decrease ${product.name} quantity`}
               disabled={quantity === 0 || !isAvailable}
               className="p-2 text-charcoal hover:text-navy hover:bg-mist transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -136,6 +147,7 @@ export function ProductCard({ product, onAddToQuote, className }: ProductCardPro
             </span>
             <button
               onClick={handleIncrement}
+              aria-label={`Increase ${product.name} quantity`}
               disabled={!isAvailable || quantity >= (product.availableQuantity ?? product.totalStock)}
               className="p-2 text-charcoal hover:text-navy hover:bg-mist transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -155,12 +167,6 @@ export function ProductCard({ product, onAddToQuote, className }: ProductCardPro
           </Button>
         </div>
 
-        {/* Stock Info */}
-        {isAvailable && (
-          <p className="text-xs text-gray mt-2">
-            {product.availableQuantity ?? product.totalStock} available
-          </p>
-        )}
       </CardBody>
     </Card>
   );

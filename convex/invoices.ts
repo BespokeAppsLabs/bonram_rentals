@@ -1,6 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { getAuthUser, requireAdmin } from "./auth.helpers";
+import type { MutationCtx } from "./_generated/server";
 
 // ============================================
 // INVOICES
@@ -10,8 +12,8 @@ import { Id } from "./_generated/dataModel";
 /**
  * Internal handler for creating invoices
  */
-async function createInvoiceHandler(ctx: any, args: {
-    quotationId: any;
+async function createInvoiceHandler(ctx: MutationCtx, args: {
+    quotationId: Id<"quotations">;
     docType: "invoice" | "quotation";
     dueDate: number;
 }) {
@@ -41,6 +43,7 @@ async function createInvoiceHandler(ctx: any, args: {
         vatAmount,
         total,
         createdAt: now,
+        customerContact: quotation.customerContact,
         templateStyle: quotation.templateStyle,
         branding: quotation.branding,
     });
@@ -56,6 +59,7 @@ export const create = mutation({
         dueDate: v.number(),
     },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         return await createInvoiceHandler(ctx, args);
     },
 });
@@ -66,6 +70,7 @@ export const create = mutation({
 export const convertToInvoice = mutation({
     args: { quotationId: v.id("quotations") },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         const dueDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
         return await createInvoiceHandler(ctx, {
             quotationId: args.quotationId,
@@ -81,6 +86,7 @@ export const convertToInvoice = mutation({
 export const getAll = query({
     args: {},
     handler: async (ctx) => {
+        await requireAdmin(ctx);
         return await ctx.db.query("invoices").order("desc").collect();
     },
 });
@@ -99,6 +105,11 @@ export const getById = query({
 
         const quotation = await ctx.db.get(invoice.quotationId);
         if (!quotation) return null;
+        const user = await getAuthUser(ctx);
+        if (!user) throw new Error("Authentication required");
+        if (user.role !== "admin" && user.role !== "staff" && quotation.userId !== user._id) {
+            throw new Error("Insufficient permissions");
+        }
 
         const items = await ctx.db
             .query("quotationItems")
@@ -125,7 +136,7 @@ export const getById = query({
         );
 
         return {
-            invoice: invoice as any,
+            invoice,
             quotation,
             lineItems
         };
@@ -138,6 +149,7 @@ export const getById = query({
 export const getByQuotation = query({
     args: { quotationId: v.id("quotations") },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         return await ctx.db
             .query("invoices")
             .withIndex("by_quotation", (q) => q.eq("quotationId", args.quotationId))
@@ -151,6 +163,11 @@ export const getByQuotation = query({
 export const getForUser = query({
     args: { userId: v.id("users") },
     handler: async (ctx, args) => {
+        const user = await getAuthUser(ctx);
+        if (!user) throw new Error("Authentication required");
+        if (user.role !== "admin" && user.role !== "staff" && user._id !== args.userId) {
+            throw new Error("Insufficient permissions");
+        }
         const quotations = await ctx.db
             .query("quotations")
             .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -178,6 +195,7 @@ export const updateStatus = mutation({
         status: v.union(v.literal("draft"), v.literal("sent"), v.literal("paid")),
     },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         await ctx.db.patch(args.id, { status: args.status });
     },
 });
@@ -199,6 +217,7 @@ export const updateSettings = mutation({
         })),
     },
     handler: async (ctx, args) => {
+        await requireAdmin(ctx);
         const { id, ...updates } = args;
         await ctx.db.patch(id, updates);
     },

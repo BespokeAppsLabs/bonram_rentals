@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { formatCurrency } from "@/lib/utils";
 import { Loader2, FileText, Clock, CheckCircle, XCircle } from "lucide-react";
 
@@ -16,9 +15,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
 };
 
 export default function AccountRentalsPage() {
-    const { user: authUser } = useAuth();
-    const tokenId = authUser?.id ? `workos|${authUser.id}` : undefined;
-    const dbUser = useQuery(api.users.getByToken, tokenId ? { tokenIdentifier: tokenId } : "skip");
+    const dbUser = useQuery(api.users.currentUser);
     // We need to get quotations for this user - for now query all and filter client-side
     // A proper by_user query would be better at scale
 
