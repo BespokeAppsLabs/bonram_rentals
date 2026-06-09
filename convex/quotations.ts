@@ -61,9 +61,6 @@ function validateEventDetails(eventDetails: {
   if (!Number.isFinite(eventDetails.startDate) || !Number.isFinite(eventDetails.endDate)) {
     throw new Error("Invalid event dates");
   }
-  if (eventDetails.startDate < Date.now() - 86_400_000) {
-    throw new Error("Event start date cannot be in the past");
-  }
   if (eventDetails.endDate < eventDetails.startDate) {
     throw new Error("Event end date must be after start date");
   }
@@ -522,6 +519,9 @@ export const submitQuote = mutation({
   },
   handler: async (ctx, args) => {
     validateEventDetails(args.eventDetails);
+    if (args.eventDetails.startDate < Date.now() - 86_400_000) {
+      throw new Error("Event start date cannot be in the past");
+    }
     validateContact(args.customerContact);
     if (args.items.length === 0) throw new Error("Select at least one item");
     if (args.items.length > MAX_QUOTE_ITEMS) throw new Error(`Quotes are limited to ${MAX_QUOTE_ITEMS} line items`);
@@ -579,7 +579,7 @@ export const submitQuote = mutation({
     }
 
     const subtotal = validatedItems.reduce((sum, item) => sum + item.lineTotal, 0);
-    const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    const rand = Math.random().toString(36).substring(2).padEnd(4, "0").slice(0, 4).toUpperCase();
     const publicReference = `BR-${new Date(now).getFullYear()}-${now.toString(36).toUpperCase()}-${rand}`;
     const quotationId = await ctx.db.insert("quotations", {
       userId: user?._id,
