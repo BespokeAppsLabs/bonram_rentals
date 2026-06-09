@@ -515,6 +515,16 @@ export const submitQuote = mutation({
     validateContact(args.customerContact);
     if (args.items.length === 0) throw new Error("Select at least one item");
 
+    // Aggregate duplicate productIds so stock check uses the true combined quantity
+    const merged = new Map<string, number>();
+    for (const item of args.items) {
+      merged.set(item.productId, (merged.get(item.productId) ?? 0) + item.quantity);
+    }
+    const deduplicatedItems = Array.from(merged.entries()).map(([productId, quantity]) => ({
+      productId: productId as Id<"products">,
+      quantity,
+    }));
+
     const now = Date.now();
     const days = Math.max(1, Math.ceil((args.eventDetails.endDate - args.eventDetails.startDate) / 86_400_000));
     const user = await getAuthUser(ctx);
@@ -526,7 +536,7 @@ export const submitQuote = mutation({
       lineTotal: number;
     }> = [];
 
-    for (const item of args.items) {
+    for (const item of deduplicatedItems) {
       if (!Number.isInteger(item.quantity) || item.quantity < 1) throw new Error("Invalid item quantity");
       const product = await ctx.db.get(item.productId);
       if (!product || !product.isActive) throw new Error("Selected product is unavailable");

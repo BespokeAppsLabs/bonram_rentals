@@ -285,10 +285,11 @@ export const createInvitation = mutation({
     },
     handler: async (ctx, args) => {
         const inviter = await requireAdmin(ctx);
+        const email = args.email.toLowerCase().trim();
         // Check for existing invitation
         const existing = await ctx.db
             .query("invitations")
-            .withIndex("by_email", (q) => q.eq("email", args.email))
+            .withIndex("by_email", (q) => q.eq("email", email))
             .first();
 
         if (existing && existing.status === "pending") {
@@ -298,7 +299,7 @@ export const createInvitation = mutation({
         // Check if user already exists
         const existingUser = await ctx.db
             .query("users")
-            .withIndex("by_email", (q) => q.eq("email", args.email))
+            .withIndex("by_email", (q) => q.eq("email", email))
             .first();
 
         if (existingUser) {
@@ -306,7 +307,7 @@ export const createInvitation = mutation({
         }
 
         const invitationId = await ctx.db.insert("invitations", {
-            email: args.email,
+            email,
             role: args.role,
             status: "pending",
             invitedBy: inviter._id,

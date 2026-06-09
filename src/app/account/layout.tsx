@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { User, FileText, Package, LogOut, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,6 +15,7 @@ const navItems = [
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
     const { user, isLoaded } = useUser();
+    const { signOut } = useClerk();
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -59,9 +60,9 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                         <button className="md:hidden p-2 text-charcoal" onClick={() => setSidebarOpen(!sidebarOpen)}>
                             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </button>
-                        <a href="/api/auth/signout" className="hidden md:flex items-center gap-2 text-sm text-gray hover:text-navy transition-colors">
+                        <button onClick={() => signOut({ redirectUrl: "/" })} className="hidden md:flex items-center gap-2 text-sm text-gray hover:text-navy transition-colors">
                             <LogOut className="w-4 h-4" /> Sign Out
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>

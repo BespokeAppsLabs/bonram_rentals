@@ -37,6 +37,7 @@ export const getFileUrl = query({
 export const deleteFile = mutation({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     await ctx.storage.delete(args.storageId);
   },
 });
