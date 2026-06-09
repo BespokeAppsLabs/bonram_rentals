@@ -50,7 +50,11 @@ export default function CatalogPage() {
     if (category) setSelectedCategory(category);
     if (Number.isFinite(guests) && guests > 0) setGuestFilter(guests);
     if (start && end) {
-      setDateRange({ start: new Date(start).getTime(), end: new Date(end).getTime() });
+      const startMs = new Date(start).getTime();
+      const endMs = new Date(end).getTime();
+      if (Number.isFinite(startMs) && Number.isFinite(endMs)) {
+        setDateRange({ start: startMs, end: endMs });
+      }
     }
     void trackFunnelEvent({ event: "catalog_viewed", source: params.has("startDate") ? "planner" : "direct" });
   }, [trackFunnelEvent]);

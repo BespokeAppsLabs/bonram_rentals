@@ -12,9 +12,15 @@ export function UserSync() {
 
     useEffect(() => {
         if (isSignedIn && isLoaded && user && syncedUserId.current !== user.id) {
+            // Claim the sync slot synchronously so concurrent renders (before the
+            // action resolves) cannot fire syncUser() more than once per user.
+            syncedUserId.current = user.id;
             syncUser()
-                .then(() => { syncedUserId.current = user.id; })
-                .catch((error) => console.error("[UserSync] Failed to sync:", error));
+                .catch((error) => {
+                    console.error("[UserSync] Failed to sync:", error);
+                    // Reset on failure so a later render can retry.
+                    if (syncedUserId.current === user.id) syncedUserId.current = null;
+                });
         }
         if (!isSignedIn) syncedUserId.current = null;
     }, [isSignedIn, isLoaded, user, syncUser]);

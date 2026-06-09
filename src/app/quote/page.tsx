@@ -91,12 +91,14 @@ export default function QuotePage() {
     if (storedEvent) {
       try {
         const parsed = JSON.parse(storedEvent);
+        const num = (value: unknown, fallback: number) =>
+          typeof value === "number" && Number.isFinite(value) ? value : fallback;
         setEventDetails((current) => ({
           ...current,
-          location: parsed.location ?? current.location,
-          guestCount: parsed.guestCount ?? current.guestCount,
-          startDate: parsed.startDate ?? current.startDate,
-          endDate: parsed.endDate ?? current.endDate,
+          location: typeof parsed.location === "string" ? parsed.location : current.location,
+          guestCount: num(parsed.guestCount, current.guestCount),
+          startDate: num(parsed.startDate, current.startDate),
+          endDate: num(parsed.endDate, current.endDate),
         }));
       } catch {
         localStorage.removeItem("bonramEventV1");

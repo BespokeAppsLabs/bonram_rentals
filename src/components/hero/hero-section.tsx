@@ -30,7 +30,8 @@ export function HeroSection({ className }: HeroSectionProps) {
     if (endDate) params.set("endDate", endDate);
     if (location.trim()) params.set("location", location.trim());
     if (guestCount) params.set("guests", guestCount);
-    window.location.href = `/catalog${params.size ? `?${params.toString()}` : ""}`;
+    const queryString = params.toString();
+    window.location.href = `/catalog${queryString ? `?${queryString}` : ""}`;
   };
 
   return (
