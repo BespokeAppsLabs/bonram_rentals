@@ -36,25 +36,28 @@ export const sendQuoteSubmitted = internalAction({
     const location = escapeHtml(args.location);
     const ref = escapeHtml(args.publicReference);
 
-    const [customerResult, staffResult] = await Promise.all([
+    const rawRef = args.publicReference;
+    const [customerResult, staffResult] = await Promise.allSettled([
       resend.emails.send({
         from,
         to: args.customerEmail,
-        subject: `Quote request received — ${ref}`,
+        subject: `Quote request received — ${rawRef}`,
         html: `<h1>Thank you, ${name}</h1><p>We received your Bonram Rentals quote request.</p><p><strong>Reference:</strong> ${ref}<br/><strong>Event date:</strong> ${eventDate}<br/><strong>Location:</strong> ${location}</p><p>Our team will review availability and contact you shortly.</p>`,
       }),
       resend.emails.send({
         from,
         to: staffEmail,
-        subject: `New quote request — ${ref}`,
+        subject: `New quote request — ${rawRef}`,
         html: `<h1>New qualified quote request</h1><p><strong>${name}</strong><br/>${email}<br/>${phone}</p><p><strong>Event date:</strong> ${eventDate}<br/><strong>Location:</strong> ${location}</p><p>Open the Bonram admin dashboard to review it.</p>`,
       }),
     ]);
 
-    if (customerResult.error || staffResult.error) {
+    const customerErr = customerResult.status === "rejected" ? customerResult.reason : customerResult.value.error;
+    const staffErr = staffResult.status === "rejected" ? staffResult.reason : staffResult.value.error;
+    if (customerErr || staffErr) {
       console.error("[notifications] Resend delivery error", {
-        customer: customerResult.error,
-        staff: staffResult.error,
+        customer: customerErr,
+        staff: staffErr,
       });
       return { sent: false, reason: "Resend delivery error" };
     }
