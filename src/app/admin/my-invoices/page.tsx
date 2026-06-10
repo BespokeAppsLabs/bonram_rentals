@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { formatCurrency } from "@/lib/utils";
 import { Loader2, FileText, Eye } from "lucide-react";
 import Link from "next/link";

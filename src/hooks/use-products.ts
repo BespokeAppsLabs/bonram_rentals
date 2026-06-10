@@ -1,76 +1,100 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 
-// ============================================
-// PRODUCTS HOOKS
-// React hooks for Convex product operations
-// ============================================
+const LOAD_TIMEOUT_MS = 8000;
 
-/**
- * Hook to fetch all active products
- */
+function useLoadTimeout(isLoading: boolean) {
+  const [timedOut, setTimedOut] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      timer.current = setTimeout(() => setTimedOut(true), LOAD_TIMEOUT_MS);
+    } else {
+      if (timer.current) clearTimeout(timer.current);
+      // Reset so a subsequent load gets a fresh timeout window instead of
+      // inheriting a stale timed-out state.
+      setTimedOut(false);
+    }
+    return () => { if (timer.current) clearTimeout(timer.current); };
+  }, [isLoading]);
+
+  return timedOut && isLoading;
+}
+
 export function useProducts() {
   const products = useQuery(api.products.getAll);
+  const isLoading = products === undefined;
+  const timedOut = useLoadTimeout(isLoading);
   return {
-    products,
-    isLoading: products === undefined,
-    error: null,
+    products: timedOut ? [] : products,
+    isLoading: isLoading && !timedOut,
+    error: timedOut ? "Unable to load products. Check your connection and try again." : null,
   };
 }
 
-/**
- * Hook to fetch products by category
- */
+export function useProductsWithAvailability(startDate: number | null, endDate: number | null) {
+  const products = useQuery(
+    api.recommendations.getProductsWithAvailability,
+    startDate !== null && endDate !== null ? { startDate, endDate } : "skip",
+  );
+  const isLoading = startDate !== null && endDate !== null && products === undefined;
+  const timedOut = useLoadTimeout(isLoading);
+  return {
+    products: timedOut ? [] : products,
+    isLoading: isLoading && !timedOut,
+    error: timedOut ? "Unable to check availability. Try again." : null,
+  };
+}
+
 export function useProductsByCategory(category: string) {
   const products = useQuery(api.products.getByCategory, { category });
+  const isLoading = products === undefined;
+  const timedOut = useLoadTimeout(isLoading);
   return {
-    products,
-    isLoading: products === undefined,
-    error: null,
+    products: timedOut ? [] : products,
+    isLoading: isLoading && !timedOut,
+    error: timedOut ? "Unable to load products. Check your connection and try again." : null,
   };
 }
 
-/**
- * Hook to fetch a single product
- */
 export function useProduct(id: Id<"products"> | null) {
-  const product = useQuery(
-    api.products.getById,
-    id ? { id } : "skip"
-  );
+  const product = useQuery(api.products.getById, id ? { id } : "skip");
+  const isLoading = id !== null && product === undefined;
+  const timedOut = useLoadTimeout(isLoading);
   return {
-    product,
-    isLoading: id !== null && product === undefined,
-    error: null,
+    product: timedOut ? null : product,
+    isLoading: isLoading && !timedOut,
+    error: timedOut ? "Unable to load product. Check your connection and try again." : null,
   };
 }
 
-/**
- * Hook to fetch products suitable for a guest count
- */
 export function useProductsByGuestCount(guestCount: number | null) {
   const products = useQuery(
     api.products.getByGuestCount,
     guestCount !== null ? { guestCount } : "skip"
   );
+  const isLoading = guestCount !== null && products === undefined;
+  const timedOut = useLoadTimeout(isLoading);
   return {
-    products,
-    isLoading: guestCount !== null && products === undefined,
-    error: null,
+    products: timedOut ? [] : products,
+    isLoading: isLoading && !timedOut,
+    error: timedOut ? "Unable to load products. Check your connection and try again." : null,
   };
 }
 
-/**
- * Hook to fetch all categories
- */
 export function useCategories() {
   const categories = useQuery(api.products.getCategories);
+  const isLoading = categories === undefined;
+  const timedOut = useLoadTimeout(isLoading);
   return {
-    categories: categories ?? [],
-    isLoading: categories === undefined,
+    categories: timedOut ? [] : (categories ?? []),
+    isLoading: isLoading && !timedOut,
+    error: timedOut ? "Unable to load categories." : null,
   };
 }
 

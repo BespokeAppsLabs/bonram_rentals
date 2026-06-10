@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
+import type { QuotationStatus } from "@/lib/types";
 
 // ============================================
 // QUOTATIONS HOOKS
@@ -23,7 +24,7 @@ export function useQuotations() {
 /**
  * Hook to fetch quotations by status (for Kanban)
  */
-export function useQuotationsByStatus(status: string) {
+export function useQuotationsByStatus(status: QuotationStatus) {
   const quotations = useQuery(api.quotations.getByStatus, { status });
   return {
     quotations,
@@ -92,6 +93,11 @@ export function useUpdateQuotationStatus() {
 export function useSubmitForReview() {
   const submitForReview = useMutation(api.quotations.submitForReview);
   return { submitForReview };
+}
+
+export function useSubmitQuote() {
+  const submitQuote = useMutation(api.quotations.submitQuote);
+  return { submitQuote };
 }
 
 /**

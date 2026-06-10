@@ -7,7 +7,8 @@ import { ProSuggestions } from "@/components/quote/pro-suggestions";
 import { Button, Input, Card, CardBody, Badge } from "@/components/ui";
 import { formatCurrency, formatDateRange, calculateDays } from "@/lib/utils";
 import { useProducts } from "@/hooks/use-products";
-import { useCreateQuotation, useAddQuotationItem } from "@/hooks/use-quotations";
+import { useSubmitQuote } from "@/hooks/use-quotations";
+import type { Id } from "../../../convex/_generated/dataModel";
 import {
   MapPin,
   Users,
@@ -38,9 +39,8 @@ interface QuoteItem {
 
 export default function QuotePage() {
   // Fetch products from Convex
-  const { products, isLoading: productsLoading } = useProducts();
-  const { createQuotation } = useCreateQuotation();
-  const { addItem } = useAddQuotationItem();
+  const { products, isLoading: productsLoading, error: productsError } = useProducts();
+  const { submitQuote } = useSubmitQuote();
 
   // Event details state
   const [eventDetails, setEventDetails] = useState({
@@ -58,6 +58,7 @@ export default function QuotePage() {
     phone: "",
     company: "",
   });
+  const [specialRequests, setSpecialRequests] = useState("");
 
   // Quote items state - loaded from sessionStorage
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
@@ -71,10 +72,13 @@ export default function QuotePage() {
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [publicReference, setPublicReference] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   // Load quote items from sessionStorage on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem("quoteItems");
+    const stored = localStorage.getItem("bonramQuoteCartV1") ?? sessionStorage.getItem("quoteItems");
+    const storedEvent = localStorage.getItem("bonramEventV1");
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -82,6 +86,22 @@ export default function QuotePage() {
         sessionStorage.removeItem("quoteItems");
       } catch (e) {
         console.error("Failed to parse quote items:", e);
+      }
+    }
+    if (storedEvent) {
+      try {
+        const parsed = JSON.parse(storedEvent);
+        const num = (value: unknown, fallback: number) =>
+          typeof value === "number" && Number.isFinite(value) ? value : fallback;
+        setEventDetails((current) => ({
+          ...current,
+          location: typeof parsed.location === "string" ? parsed.location : current.location,
+          guestCount: num(parsed.guestCount, current.guestCount),
+          startDate: num(parsed.startDate, current.startDate),
+          endDate: num(parsed.endDate, current.endDate),
+        }));
+      } catch {
+        localStorage.removeItem("bonramEventV1");
       }
     }
   }, []);
@@ -170,9 +190,9 @@ export default function QuotePage() {
     if (quoteItems.length === 0) return;
 
     setIsSubmitting(true);
+    setSubmitError("");
     try {
-      // Create quotation in Convex
-      const quotationId = await createQuotation({
+      const result = await submitQuote({
         eventDetails: {
           location: eventDetails.location,
           guestCount: eventDetails.guestCount,
@@ -186,29 +206,24 @@ export default function QuotePage() {
           phone: customerContact.phone,
           company: customerContact.company || undefined,
         },
-      });
-
-      // Add items to quotation
-      for (const item of quoteItems) {
-        await addItem({
-          quotationId,
-          productId: item.productId as any,
+        source: "website",
+        specialRequests: specialRequests.trim() || undefined,
+        items: quoteItems.map((item) => ({
+          productId: item.productId as Id<"products">,
           quantity: item.quantity,
-          description: item.productName,
-          priceAtTime: item.dailyRate,
-        });
-      }
-
+        })),
+      });
+      setPublicReference(result.publicReference);
+      localStorage.removeItem("bonramQuoteCartV1");
       setIsSubmitted(true);
     } catch (error) {
       console.error("Failed to submit quote:", error);
-      alert("Failed to submit quote. Please try again.");
+      setSubmitError(error instanceof Error ? error.message : "Failed to submit quote. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Loading state
   if (productsLoading) {
     return (
       <>
@@ -216,7 +231,32 @@ export default function QuotePage() {
         <main className="min-h-screen bg-mist flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-navy mx-auto mb-4" />
-            <p className="text-gray">Loading...</p>
+            <p className="text-gray">Loading quote builder...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (productsError) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-mist flex items-center justify-center">
+          <div className="text-center max-w-md px-4">
+            <h2 className="text-xl font-heading font-bold text-navy mb-2">
+              Quote Builder Unavailable
+            </h2>
+            <p className="text-gray mb-6">{productsError}</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="gold" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+              <a href="tel:+27742748684">
+                <Button variant="outline">Call Us: 074 274 8684</Button>
+              </a>
+            </div>
           </div>
         </main>
         <Footer />
@@ -241,6 +281,11 @@ export default function QuotePage() {
               <p className="text-gray mb-6">
                 Our team will review your request and get back to you within 4 hours.
               </p>
+              {publicReference && (
+                <p className="text-sm font-semibold text-navy mb-6">
+                  Reference: {publicReference}
+                </p>
+              )}
               <Button variant="gold" onClick={() => window.location.href = "/"}>
                 Return Home
               </Button>
@@ -328,6 +373,22 @@ export default function QuotePage() {
                         value={eventDetails.guestCount}
                         onChange={(e) => setEventDetails({ ...eventDetails, guestCount: parseInt(e.target.value) || 0 })}
                       />
+                      <label className="text-sm font-medium text-charcoal">
+                        Event Type
+                        <select
+                          value={eventDetails.eventType}
+                          onChange={(e) => setEventDetails({ ...eventDetails, eventType: e.target.value })}
+                          className="mt-1 w-full px-4 py-3 rounded-sm border border-gray-light bg-white focus:outline-none focus:border-gold"
+                        >
+                          <option value="wedding">Wedding</option>
+                          <option value="corporate">Corporate</option>
+                          <option value="government">Government</option>
+                          <option value="funeral">Funeral</option>
+                          <option value="festival">Festival</option>
+                          <option value="private">Private Event</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </label>
                       <Button
                         variant="primary"
                         onClick={() => setIsEditingEvent(false)}
@@ -440,6 +501,21 @@ export default function QuotePage() {
                       </Button>
                     </div>
                   )}
+                </CardBody>
+              </Card>
+
+              <Card>
+                <CardBody>
+                  <h2 className="text-lg font-heading font-semibold text-navy mb-2">Special Requests</h2>
+                  <p className="text-sm text-gray mb-4">Tell us about access, setup, compliance, staffing, or other event requirements.</p>
+                  <textarea
+                    value={specialRequests}
+                    onChange={(e) => setSpecialRequests(e.target.value)}
+                    rows={4}
+                    maxLength={1500}
+                    placeholder="Optional notes for the Bonram team"
+                    className="w-full px-4 py-3 rounded-sm border border-gray-light bg-white focus:outline-none focus:border-gold"
+                  />
                 </CardBody>
               </Card>
 
@@ -559,6 +635,11 @@ export default function QuotePage() {
                     )}
                   </Button>
 
+                  {submitError && (
+                    <p role="alert" className="text-sm text-error text-center mt-3">
+                      {submitError}
+                    </p>
+                  )}
                   <p className="text-xs text-gray text-center mt-3">
                     Our team will review and respond within 4 hours
                   </p>

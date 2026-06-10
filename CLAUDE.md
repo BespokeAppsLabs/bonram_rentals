@@ -7,8 +7,8 @@ Bonram Rentals Digital Portal is a "Quote-First" event equipment hire platform t
 - Framework: Next.js 16 (App Router, React 19)
 - Package manager: **npm** — use exclusively
 - Database/Backend: Convex (real-time reactive database + serverless functions)
-- Auth: WorkOS AuthKit (via `@workos-inc/authkit-nextjs` + `@convex-dev/workos`)
-- Key libs: `convex`, `workos`, `resend`, `@react-pdf/renderer`, `@googlemaps/js-api-loader`, `recharts`
+- Auth: Clerk (via `@clerk/nextjs` + `convex/react-clerk`)
+- Key libs: `convex`, `resend`, `@react-pdf/renderer`, `@googlemaps/js-api-loader`, `recharts`
 - Styling: Tailwind CSS v4
 
 ## Branch Flow
@@ -27,7 +27,7 @@ npm run start     # production server
 ```
 
 ## Architecture
-The app uses Next.js App Router with a `src/` layout. Convex handles all backend logic — schema, queries, mutations, and actions live in `convex/`. The frontend is split into public-facing pages (catalog, quote flow, home) and an auth-gated admin portal (`/admin`) with inventory and CRM tools. WorkOS AuthKit manages authentication with role-based access (Admin/Staff).
+The app uses Next.js App Router with a `src/` layout. Convex handles all backend logic — schema, queries, mutations, and actions live in `convex/`. The frontend is split into public-facing pages (catalog, quote flow, home) and an auth-gated admin portal (`/admin`) with inventory and CRM tools. Clerk manages authentication with role-based access (Admin/Staff) stored in Convex.
 
 Key directories:
 - `src/app/` — Next.js App Router pages and layouts
@@ -47,15 +47,15 @@ Key directories:
 4. Conventional commits: feat/fix/chore/docs/refactor.
 5. Dev server runs on port **8022** — do not change this.
 6. Convex functions live in `convex/` — never put backend logic in `src/`.
-7. Auth is WorkOS AuthKit — do not introduce a second auth provider.
+7. Auth is Clerk — do not introduce a second auth provider.
 8. All quote/inventory mutations must go through Convex mutations, not direct DB calls.
 9. "Quote-First" UX principle — no "Buy Now" flows; always route to quote cart.
 
 ## Environment
 See `.env.example` for required variables. Key vars:
 - `NEXT_PUBLIC_CONVEX_URL` — Convex deployment URL
-- `WORKOS_CLIENT_ID`, `WORKOS_API_KEY`, `WORKOS_COOKIE_PASSWORD` — WorkOS auth
-- `NEXT_PUBLIC_WORKOS_REDIRECT_URI` — OAuth callback (default: `http://localhost:8022/callback`)
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` — Clerk auth (frontend + backend)
+- `CLERK_JWT_ISSUER_DOMAIN` — Clerk JWT issuer, set in Convex env (Dashboard → JWT Templates → Convex)
 - `RESEND_API_KEY` — Transactional email
 - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` — Location autocomplete (optional)
 - `NEXT_PUBLIC_APP_URL` — App base URL

@@ -1,5 +1,4 @@
-import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { internalMutation } from "./_generated/server";
 
 /**
  * Seed the database with initial products
@@ -7,7 +6,7 @@ import { v } from "convex/values";
  * 
  * Usage: npx convex run seed:seedProducts
  */
-export const seedProducts = mutation({
+export const seedProducts = internalMutation({
   args: {},
   handler: async (ctx) => {
     // Check if products already exist
@@ -393,7 +392,7 @@ export const seedProducts = mutation({
  * 
  * Usage: npx convex run seed:clearProducts
  */
-export const clearProducts = mutation({
+export const clearProducts = internalMutation({
   args: {},
   handler: async (ctx) => {
     const products = await ctx.db.query("products").collect();
@@ -410,9 +409,9 @@ export const clearProducts = mutation({
  * Seed the initial super admin user
  * Run once: npx convex run seed:seedAdmin
  * 
- * NOTE: Password "AdminBespoke2026!" must be configured in WorkOS AuthKit
+ * Clerk user must sign in once to link the pending record.
  */
-export const seedAdmin = mutation({
+export const seedAdmin = internalMutation({
   args: {},
   handler: async (ctx) => {
     const email = "lucas@bonram.co.za";
@@ -439,4 +438,3 @@ export const seedAdmin = mutation({
     return { message: "Admin user seeded", userId };
   },
 });
-

@@ -1,4 +1,5 @@
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
 import { requireAdmin } from "./auth.helpers";
 
 // ============================================
@@ -169,5 +170,50 @@ export const getBookingTrends = query({
                 ...data,
             }))
             .sort((a, b) => a.month.localeCompare(b.month));
+    },
+});
+
+export const trackFunnelEvent = mutation({
+    args: {
+        event: v.union(
+            v.literal("planner_started"),
+            v.literal("catalog_viewed"),
+            v.literal("item_added"),
+            v.literal("quote_started"),
+            v.literal("quote_submitted"),
+            v.literal("quote_failed"),
+        ),
+        source: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.insert("funnelEvents", { ...args, createdAt: Date.now() });
+    },
+});
+
+export const getFunnelStats = query({
+    args: {},
+    handler: async (ctx) => {
+        await requireAdmin(ctx);
+        // Sample the most recent events, ordered for deterministic results, and
+        // bounded well under Convex's per-query read limit. At current volume this
+        // returns every row (stats unchanged); at scale it becomes a rolling window.
+        // Long-term fix: maintain a counter doc updated in trackFunnelEvent.
+        const FUNNEL_STATS_SAMPLE = 4000;
+        const events = await ctx.db
+            .query("funnelEvents")
+            .order("desc")
+            .take(FUNNEL_STATS_SAMPLE);
+        const counts = events.reduce<Record<string, number>>((result, event) => {
+            result[event.event] = (result[event.event] ?? 0) + 1;
+            return result;
+        }, {});
+        const catalogViews = counts.catalog_viewed ?? 0;
+        const submissions = counts.quote_submitted ?? 0;
+        return {
+            catalogViews,
+            itemsAdded: counts.item_added ?? 0,
+            quoteSubmissions: submissions,
+            conversionRate: catalogViews > 0 ? (submissions / catalogViews) * 100 : 0,
+        };
     },
 });

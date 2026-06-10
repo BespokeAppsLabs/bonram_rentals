@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import {
@@ -31,7 +31,7 @@ import { useState } from "react";
 const adminNavItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products", icon: Package },
-    { href: "/admin/documents", label: "Documents", icon: FolderEdit },
+    { href: "/admin/documents", label: "Quote Desk", icon: FolderEdit },
     { href: "/admin/invoices", label: "Invoices", icon: FileText },
     { href: "/admin/staff", label: "Staff", icon: Users },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
@@ -46,7 +46,8 @@ const customerNavItems = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-    const { user, loading, signOut } = useAuth();
+    const { user, isLoaded } = useUser();
+    const { signOut } = useClerk();
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -61,14 +62,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return <>{children}</>;
     }
 
-    // Loading state (WorkOS or Convex)
-    // We stay in loading if:
-    // 1. WorkOS is still loading
-    // 2. We are logged in but Convex hasn't returned any session data yet (undefined)
-    // 3. We are logged in, session returned but user record still pending
     const isSyncing = user && session?.role === "pending";
 
-    if (loading || session === undefined || isSyncing) {
+    if (!isLoaded || session === undefined || isSyncing) {
         return (
             <div className="min-h-screen bg-mist flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4 text-center px-6">
@@ -101,7 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     const handleSignOut = async () => {
-        await signOut({ returnTo: "/" });
+        await signOut({ redirectUrl: "/" });
     };
 
     // Role-based access control
@@ -184,14 +180,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="flex items-center gap-3 mb-3">
                         <div className="w-8 h-8 bg-gold/20 rounded-full flex items-center justify-center">
                             <span className="text-gold text-sm font-bold">
-                                {user.firstName?.[0] ?? user.email?.[0]?.toUpperCase() ?? "?"}
+                                {user.firstName?.[0] ?? user.primaryEmailAddress?.emailAddress?.[0]?.toUpperCase() ?? "?"}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
                                 {user.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "User"}
                             </p>
-                            <p className="text-xs text-white/50 truncate">{user.email}</p>
+                            <p className="text-xs text-white/50 truncate">{user.primaryEmailAddress?.emailAddress}</p>
                         </div>
                     </div>
                     <button

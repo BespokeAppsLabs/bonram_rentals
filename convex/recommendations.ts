@@ -86,6 +86,8 @@ export const checkAvailability = query({
     endDate: v.number(),
   },
   handler: async (ctx, args) => {
+    // Reject inverted date ranges, consistent with getProductsWithAvailability.
+    if (args.endDate < args.startDate) throw new Error("Invalid date range");
     // Get product stock
     const product = await ctx.db.get(args.productId);
     if (!product) return { available: false, availableQuantity: 0 };
@@ -96,9 +98,9 @@ export const checkAvailability = query({
       .withIndex("by_product", (q) => q.eq("productId", args.productId))
       .filter((q) => 
         q.and(
-          q.gte(q.field("endDate"), args.startDate),
-          q.lte(q.field("startDate"), args.endDate),
-          q.neq(q.field("status"), "cancelled")
+          q.gt(q.field("endDate"), args.startDate),
+          q.lt(q.field("startDate"), args.endDate),
+          q.or(q.eq(q.field("status"), "reserved"), q.eq(q.field("status"), "confirmed"))
         )
       )
       .collect();
@@ -129,6 +131,7 @@ export const getProductsWithAvailability = query({
     endDate: v.number(),
   },
   handler: async (ctx, args) => {
+    if (args.endDate < args.startDate) throw new Error("Invalid date range");
     const products = await ctx.db
       .query("products")
       .filter((q) => q.eq(q.field("isActive"), true))
@@ -141,9 +144,9 @@ export const getProductsWithAvailability = query({
           .withIndex("by_product", (q) => q.eq("productId", product._id))
           .filter((q) =>
             q.and(
-              q.gte(q.field("endDate"), args.startDate),
-              q.lte(q.field("startDate"), args.endDate),
-              q.neq(q.field("status"), "cancelled")
+              q.gt(q.field("endDate"), args.startDate),
+              q.lt(q.field("startDate"), args.endDate),
+              q.or(q.eq(q.field("status"), "reserved"), q.eq(q.field("status"), "confirmed"))
             )
           )
           .collect();
