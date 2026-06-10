@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { formatCurrency } from "@/lib/utils";
 import { Loader2, FileText, Eye, Printer } from "lucide-react";
 import Link from "next/link";
@@ -14,9 +13,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AccountInvoicesPage() {
-    const { user: authUser } = useAuth();
-    const tokenId = authUser?.id ? `workos|${authUser.id}` : undefined;
-    const dbUser = useQuery(api.users.getByToken, tokenId ? { tokenIdentifier: tokenId } : "skip");
+    const dbUser = useQuery(api.users.currentUser);
     const invoices = useQuery(api.invoices.getForUser, dbUser ? { userId: dbUser._id } : "skip");
 
     if (!dbUser || !invoices) {

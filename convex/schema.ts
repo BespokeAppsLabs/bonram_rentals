@@ -14,7 +14,7 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    tokenIdentifier: v.string(), // WorkOS AuthKit identifier
+    tokenIdentifier: v.string(), // Clerk user identifier
     role: v.union(
       v.literal("admin"),
       v.literal("staff"),
@@ -65,6 +65,10 @@ export default defineSchema({
 
   quotations: defineTable({
     userId: v.optional(v.id("users")), // Optional for guest leads
+    publicReference: v.optional(v.string()),
+    submittedAt: v.optional(v.number()),
+    specialRequests: v.optional(v.string()),
+    source: v.optional(v.string()),
     status: v.union(
       v.literal("draft"),
       v.literal("pending_review"), // Submitted by client
@@ -172,6 +176,19 @@ export default defineSchema({
     .index("by_product", ["productId"])
     .index("by_quotation", ["quotationId"])
     .index("by_dates", ["startDate", "endDate"]),
+
+  funnelEvents: defineTable({
+    event: v.union(
+      v.literal("planner_started"),
+      v.literal("catalog_viewed"),
+      v.literal("item_added"),
+      v.literal("quote_started"),
+      v.literal("quote_submitted"),
+      v.literal("quote_failed"),
+    ),
+    source: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_event", ["event"]),
 
   // ============================================
   // Invoices

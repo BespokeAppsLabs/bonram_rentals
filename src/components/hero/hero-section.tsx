@@ -3,6 +3,9 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
 import { Calendar, MapPin, Users, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 // ============================================
 // HERO SECTION COMPONENT
@@ -14,19 +17,30 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ className }: HeroSectionProps) {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [guestCount, setGuestCount] = useState("");
+  const trackFunnelEvent = useMutation(api.analytics.trackFunnelEvent);
+
+  const browseGear = () => {
+    void trackFunnelEvent({ event: "planner_started", source: "homepage" });
+    const params = new URLSearchParams();
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+    if (location.trim()) params.set("location", location.trim());
+    if (guestCount) params.set("guests", guestCount);
+    const queryString = params.toString();
+    window.location.href = `/catalog${queryString ? `?${queryString}` : ""}`;
+  };
+
   return (
     <section className={cn("relative min-h-[90vh] flex items-center justify-center", className)}>
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('/images/hero-bg.jpg')`,
-          }}
-        />
-        {/* Solid Navy Background - No Image Transparency */}
-        <div className="absolute inset-0 bg-navy" />
-      </div>
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/products/double_trailer.png')" }}
+      />
+      <div className="absolute inset-0 z-0 bg-navy/90" />
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-20">
@@ -54,9 +68,15 @@ export function HeroSection({ className }: HeroSectionProps) {
           <div className="animate-slide-up" style={{ animationDelay: "0.3s" }}>
             <QuickStartBar
               variant="hero"
-              onSubmit={() => {
-                window.location.href = "/catalog";
-              }}
+              startDate={startDate}
+              endDate={endDate}
+              location={location}
+              guestCount={guestCount}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              onLocationChange={setLocation}
+              onGuestCountChange={(count) => setGuestCount(count ? String(count) : "")}
+              onSubmit={browseGear}
             />
           </div>
         </div>
@@ -90,19 +110,29 @@ function TrustIndicator({ label }: { label: string }) {
 
 interface QuickStartBarProps {
   className?: string;
-  onDateChange?: (dates: { startDate: Date | null; endDate: Date | null }) => void;
   onLocationChange?: (location: string) => void;
   onGuestCountChange?: (count: number) => void;
   onSubmit?: () => void;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  guestCount?: string;
+  onStartDateChange?: (value: string) => void;
+  onEndDateChange?: (value: string) => void;
 }
 
 export function QuickStartBar({
   className,
   variant = "standalone",
-  onDateChange,
   onLocationChange,
   onGuestCountChange,
   onSubmit,
+  startDate = "",
+  endDate = "",
+  location = "",
+  guestCount = "",
+  onStartDateChange,
+  onEndDateChange,
 }: QuickStartBarProps & { variant?: "standalone" | "hero" }) {
   return (
     <div className={cn(
@@ -129,19 +159,29 @@ export function QuickStartBar({
               <Calendar className="inline w-4 h-4 mr-1 text-gold" />
               Event Dates
             </label>
+            <div className="grid grid-cols-2 gap-2">
             <input
-              type="text"
-              placeholder="Select dates"
+              type="date"
+              aria-label="Event start date"
+              value={startDate}
+              min={new Date().toISOString().split("T")[0]}
               className={cn(
                 "w-full px-4 py-3 rounded-sm border focus:outline-none focus:border-gold transition-luxury",
                 variant === "hero"
                   ? "bg-mist border-gray-light text-navy placeholder:text-gray"
                   : "bg-white border-gray-light text-charcoal placeholder:text-gray"
               )}
-              onChange={(e) => {
-                console.log("Date change:", e.target.value);
-              }}
+              onChange={(e) => onStartDateChange?.(e.target.value)}
             />
+            <input
+              type="date"
+              aria-label="Event end date"
+              value={endDate}
+              min={startDate || new Date().toISOString().split("T")[0]}
+              className="w-full px-2 py-3 rounded-sm border focus:outline-none focus:border-gold transition-luxury bg-mist border-gray-light text-navy"
+              onChange={(e) => onEndDateChange?.(e.target.value)}
+            />
+            </div>
           </div>
 
           <div className="relative">
@@ -155,6 +195,7 @@ export function QuickStartBar({
             <input
               type="text"
               placeholder="Location"
+              value={location}
               className={cn(
                 "w-full px-4 py-3 rounded-sm border focus:outline-none focus:border-gold transition-luxury",
                 variant === "hero"
@@ -177,6 +218,7 @@ export function QuickStartBar({
               type="number"
               placeholder="Guests"
               min="1"
+              value={guestCount}
               className={cn(
                 "w-full px-4 py-3 rounded-sm border focus:outline-none focus:border-gold transition-luxury",
                 variant === "hero"

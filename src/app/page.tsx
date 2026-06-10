@@ -2,8 +2,8 @@
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { HeroSection, QuickStartBar } from "@/components/hero/hero-section";
-import { Button, Card, CardBody, Badge } from "@/components/ui";
+import { HeroSection } from "@/components/hero/hero-section";
+import { Button, Card, CardBody } from "@/components/ui";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { ArrowRight, CheckCircle, Users, Building2, Calendar, Loader2 } from "lucide-react";

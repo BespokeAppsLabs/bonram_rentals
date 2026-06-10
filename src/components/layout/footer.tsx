@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 // ============================================
 // FOOTER COMPONENT
@@ -20,10 +22,12 @@ export function Footer({ className }: FooterProps) {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="relative h-20 w-auto">
-                <img
+                <Image
                   src="/Bonram-Logo-Transparent.png"
                   alt="Bonram Rentals"
-                  className="h-full w-auto object-contain"
+                  width={200}
+                  height={80}
+                  className="object-contain"
                 />
               </div>
             </div>
@@ -31,9 +35,7 @@ export function Footer({ className }: FooterProps) {
               Presidential-grade event equipment hire trusted by South Africa's biggest institutions.
             </p>
             <div className="flex gap-4">
-              <SocialLink href="#" icon={<Facebook className="w-5 h-5" />} />
-              <SocialLink href="#" icon={<Instagram className="w-5 h-5" />} />
-              <SocialLink href="#" icon={<Linkedin className="w-5 h-5" />} />
+              <SocialLink href="https://www.facebook.com/BonramRentals" label="Bonram Rentals on Facebook" icon={<Facebook className="w-5 h-5" />} />
             </div>
           </div>
 
@@ -42,8 +44,9 @@ export function Footer({ className }: FooterProps) {
             <h3 className="font-heading font-semibold text-lg mb-4 text-white uppercase tracking-wider">Quick Links</h3>
             <ul className="space-y-2">
               <FooterLink href="/catalog">Equipment Catalog</FooterLink>
-              <FooterLink href="/coming-soon">Our Services</FooterLink>
-              <FooterLink href="/coming-soon">About Us</FooterLink>
+              <FooterLink href="/services">Our Services</FooterLink>
+              <FooterLink href="/about">About Us</FooterLink>
+              <FooterLink href="/contact">Contact</FooterLink>
               <FooterLink href="/quote">Request Quote</FooterLink>
             </ul>
           </div>
@@ -73,8 +76,8 @@ export function Footer({ className }: FooterProps) {
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-gold mt-0.5" />
-                <a href="mailto:info@bonram.co.za" className="text-white hover:text-gold transition-colors">
-                  info@bonram.co.za
+                <a href="mailto:rentals@bonram.co.za" className="text-white hover:text-gold transition-colors">
+                  rentals@bonram.co.za
                 </a>
               </li>
               <li className="flex items-start gap-3">
@@ -97,12 +100,12 @@ export function Footer({ className }: FooterProps) {
               © {new Date().getFullYear()} Bonram (Pty) Ltd. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <a href="/coming-soon" className="text-mist hover:text-white transition-colors">
+              <Link href="/privacy" className="text-mist hover:text-white transition-colors">
                 Privacy Policy
-              </a>
-              <a href="/coming-soon" className="text-mist hover:text-white transition-colors">
+              </Link>
+              <Link href="/terms" className="text-mist hover:text-white transition-colors">
                 Terms of Service
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -118,20 +121,23 @@ export function Footer({ className }: FooterProps) {
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <li>
-      <a
+      <Link
         href={href}
         className="text-mist hover:text-gold transition-colors text-sm"
       >
         {children}
-      </a>
+      </Link>
     </li>
   );
 }
 
-function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
+function SocialLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
   return (
     <a
       href={href}
+      aria-label={label}
+      target="_blank"
+      rel="noreferrer"
       className="w-10 h-10 bg-mist rounded-lg flex items-center justify-center text-navy hover:bg-gold hover:text-white transition-all"
     >
       {icon}

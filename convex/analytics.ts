@@ -1,4 +1,5 @@
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
 import { requireAdmin } from "./auth.helpers";
 
 // ============================================
@@ -169,5 +170,46 @@ export const getBookingTrends = query({
                 ...data,
             }))
             .sort((a, b) => a.month.localeCompare(b.month));
+    },
+});
+
+export const trackFunnelEvent = mutation({
+    args: {
+        event: v.union(
+            v.literal("planner_started"),
+            v.literal("catalog_viewed"),
+            v.literal("item_added"),
+            v.literal("quote_started"),
+            v.literal("quote_submitted"),
+            v.literal("quote_failed"),
+        ),
+        source: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        await ctx.db.insert("funnelEvents", { ...args, createdAt: Date.now() });
+    },
+});
+
+export const getFunnelStats = query({
+    args: {},
+    handler: async (ctx) => {
+        await requireAdmin(ctx);
+        // Bound the scan to stay well under Convex's per-query read limits as the
+        // funnelEvents table grows. For the current data volume this returns every
+        // row, so stats are unchanged; at scale, replace with a maintained counter.
+        const FUNNEL_STATS_LIMIT = 10000;
+        const events = await ctx.db.query("funnelEvents").take(FUNNEL_STATS_LIMIT);
+        const counts = events.reduce<Record<string, number>>((result, event) => {
+            result[event.event] = (result[event.event] ?? 0) + 1;
+            return result;
+        }, {});
+        const catalogViews = counts.catalog_viewed ?? 0;
+        const submissions = counts.quote_submitted ?? 0;
+        return {
+            catalogViews,
+            itemsAdded: counts.item_added ?? 0,
+            quoteSubmissions: submissions,
+            conversionRate: catalogViews > 0 ? (submissions / catalogViews) * 100 : 0,
+        };
     },
 });

@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { Button } from "@/components/ui";
 import { Save, Loader2, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";

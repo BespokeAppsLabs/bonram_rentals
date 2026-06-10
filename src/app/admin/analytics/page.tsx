@@ -10,8 +10,9 @@ export default function AdminAnalyticsPage() {
     const revenueByCategory = useQuery(api.analytics.getRevenueByCategory);
     const topProducts = useQuery(api.analytics.getTopProducts);
     const trends = useQuery(api.analytics.getBookingTrends);
+    const funnel = useQuery(api.analytics.getFunnelStats);
 
-    const isLoading = !stats || !revenueByCategory || !topProducts || !trends;
+    const isLoading = !stats || !revenueByCategory || !topProducts || !trends || !funnel;
 
     if (isLoading) {
         return (
@@ -57,6 +58,15 @@ export default function AdminAnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-xl border border-gray-light p-6 lg:col-span-2">
+                    <h2 className="text-lg font-heading font-semibold text-navy mb-4">Qualified Quote Funnel</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Metric label="Catalog Views" value={String(funnel.catalogViews)} />
+                        <Metric label="Items Added" value={String(funnel.itemsAdded)} />
+                        <Metric label="Quotes Submitted" value={String(funnel.quoteSubmissions)} />
+                        <Metric label="Conversion" value={`${funnel.conversionRate.toFixed(1)}%`} />
+                    </div>
+                </div>
                 {/* Revenue by Category */}
                 <div className="bg-white rounded-xl border border-gray-light p-6">
                     <h2 className="text-lg font-heading font-semibold text-navy mb-4">Revenue by Category</h2>
@@ -145,4 +155,8 @@ export default function AdminAnalyticsPage() {
             </div>
         </div>
     );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+    return <div className="bg-mist p-4 rounded-lg"><p className="text-xs text-gray uppercase tracking-wide">{label}</p><p className="text-2xl font-bold text-navy mt-1">{value}</p></div>;
 }
