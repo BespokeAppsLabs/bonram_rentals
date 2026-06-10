@@ -86,6 +86,8 @@ export const checkAvailability = query({
     endDate: v.number(),
   },
   handler: async (ctx, args) => {
+    // Reject inverted date ranges, consistent with getProductsWithAvailability.
+    if (args.endDate < args.startDate) throw new Error("Invalid date range");
     // Get product stock
     const product = await ctx.db.get(args.productId);
     if (!product) return { available: false, availableQuantity: 0 };

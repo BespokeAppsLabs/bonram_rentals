@@ -194,11 +194,15 @@ export const getFunnelStats = query({
     args: {},
     handler: async (ctx) => {
         await requireAdmin(ctx);
-        // Bound the scan to stay well under Convex's per-query read limits as the
-        // funnelEvents table grows. For the current data volume this returns every
-        // row, so stats are unchanged; at scale, replace with a maintained counter.
-        const FUNNEL_STATS_LIMIT = 10000;
-        const events = await ctx.db.query("funnelEvents").take(FUNNEL_STATS_LIMIT);
+        // Sample the most recent events, ordered for deterministic results, and
+        // bounded well under Convex's per-query read limit. At current volume this
+        // returns every row (stats unchanged); at scale it becomes a rolling window.
+        // Long-term fix: maintain a counter doc updated in trackFunnelEvent.
+        const FUNNEL_STATS_SAMPLE = 4000;
+        const events = await ctx.db
+            .query("funnelEvents")
+            .order("desc")
+            .take(FUNNEL_STATS_SAMPLE);
         const counts = events.reduce<Record<string, number>>((result, event) => {
             result[event.event] = (result[event.event] ?? 0) + 1;
             return result;

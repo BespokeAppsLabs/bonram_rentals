@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui";
@@ -11,6 +12,7 @@ import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { product, isLoading, error } = useProduct(id as Id<"products">);
 
   const addToQuote = () => {
@@ -27,7 +29,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       ? items.map((item: { productId: string; quantity: number }) => item.productId === product._id ? { ...item, quantity: item.quantity + 1 } : item)
       : [...items, { productId: product._id, productName: product.name, category: product.category, dailyRate: product.dailyRate, quantity: 1 }];
     localStorage.setItem("bonramQuoteCartV1", JSON.stringify(next));
-    window.location.href = "/quote";
+    router.push("/quote");
   };
 
   return (

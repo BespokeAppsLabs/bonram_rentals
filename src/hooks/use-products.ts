@@ -12,13 +12,16 @@ function useLoadTimeout(isLoading: boolean) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (isLoading && !timedOut) {
+    if (isLoading) {
       timer.current = setTimeout(() => setTimedOut(true), LOAD_TIMEOUT_MS);
     } else {
       if (timer.current) clearTimeout(timer.current);
+      // Reset so a subsequent load gets a fresh timeout window instead of
+      // inheriting a stale timed-out state.
+      setTimedOut(false);
     }
     return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [isLoading, timedOut]);
+  }, [isLoading]);
 
   return timedOut && isLoading;
 }
