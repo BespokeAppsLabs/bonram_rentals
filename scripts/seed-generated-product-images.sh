@@ -26,7 +26,12 @@ jq -e 'all(.[]; (.file | test("_generated\\.(png|jpg|jpeg|webp)$")))' "$manifest
   exit 1
 }
 
-protected='["Gas Braai (BBQ)","Stage Lighting Package","VIP Toilet Trailer","Standard Portable Toilet"]'
+audit="$(CI=1 npx convex run seedImages:audit '{}')"
+jq -e 'length == 32' <<<"$audit" >/dev/null || { echo "Convex must contain exactly 32 products" >&2; exit 1; }
+
+# Reuse the protected flag from seedImages:audit (convex/seedImages.ts) instead of a
+# second hardcoded list, so the two never drift out of sync.
+protected="$(jq -c '[.[] | select(.protected) | .name]' <<<"$audit")"
 jq -e --argjson protected "$protected" 'all(.[]; .product as $name | ($protected | index($name) | not))' "$manifest" >/dev/null || {
   echo "Manifest contains a protected product" >&2
   exit 1
@@ -44,8 +49,6 @@ while IFS= read -r relative; do
   file "$image" | grep -qE "$magic" || { echo "Invalid image: $image" >&2; exit 1; }
 done < <(jq -r '.[].file' "$manifest")
 
-audit="$(CI=1 npx convex run seedImages:audit '{}')"
-jq -e 'length == 32' <<<"$audit" >/dev/null || { echo "Convex must contain exactly 32 products" >&2; exit 1; }
 jq -e --argjson protected "$protected" 'all(.[] | select(.name as $name | $protected | index($name)); .imageStorageId != null)' <<<"$audit" >/dev/null || {
   echo "Every protected product must retain its existing storage image" >&2
   exit 1

@@ -9,11 +9,11 @@ project_root="$(cd "$repo_root/.." && pwd)"
 manifest="$repo_root/.archon/data/ref-images-products.json"
 output_dir="$project_root/docs/assets/generated-products"
 ledger="$output_dir/generation-ledger.jsonl"
-hf="${HIGGSFIELD_BIN:-/Users/lucas/.hermes/node/bin/higgsfield}"
+hf="${HIGGSFIELD_BIN:-higgsfield}"
 mkdir -p "$output_dir"
 
 for command in jq curl file; do command -v "$command" >/dev/null || { echo "Missing command: $command" >&2; exit 1; }; done
-[[ -x "$hf" ]] || { echo "Missing Higgsfield CLI: $hf" >&2; exit 1; }
+command -v "$hf" >/dev/null || [[ -x "$hf" ]] || { echo "Missing Higgsfield CLI: $hf" >&2; exit 1; }
 [[ "$(jq length "$manifest")" == 32 ]] || { echo "Manifest must contain 32 products" >&2; exit 1; }
 jq -e '([.[].slug] | length) == ([.[].slug] | unique | length)' "$manifest" >/dev/null || {
   echo "Product slugs must be unique" >&2

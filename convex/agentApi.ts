@@ -139,6 +139,14 @@ export const agentCreateInvoice = internalMutation({
   handler: async (ctx, args) => {
     if (args.items.length === 0)
       throw new Error("At least one line item is required");
+    if (
+      args.eventDetails &&
+      (!Number.isFinite(args.eventDetails.startDate) ||
+        !Number.isFinite(args.eventDetails.endDate) ||
+        args.eventDetails.startDate < 0 ||
+        args.eventDetails.endDate <= args.eventDetails.startDate)
+    )
+      throw new Error("eventDetails.endDate must be after startDate");
 
     const now = Date.now();
     const userId = await ensureInvoiceUser(ctx, args.customer);
@@ -171,7 +179,12 @@ export const agentCreateInvoice = internalMutation({
 
     let subtotal = 0;
     for (const it of args.items) {
-      if (it.quantity <= 0 || it.unitPrice < 0)
+      if (
+        !Number.isFinite(it.quantity) ||
+        !Number.isFinite(it.unitPrice) ||
+        it.quantity <= 0 ||
+        it.unitPrice < 0
+      )
         throw new Error("Invalid line item quantity/price");
       const lineTotal = it.unitPrice * it.quantity;
       subtotal += lineTotal;
