@@ -1,24 +1,15 @@
-// ============================================
-// CONVEX AUTH CONFIG
-// WorkOS AuthKit JWT validation
-// ============================================
-
-const clientId = process.env.WORKOS_CLIENT_ID;
+const issuerDomain = process.env.CLERK_JWT_ISSUER_DOMAIN;
+if (!issuerDomain) {
+    throw new Error(
+        "CLERK_JWT_ISSUER_DOMAIN is not set. Configure it in the Convex deployment environment (Clerk Dashboard → JWT Templates → Convex).",
+    );
+}
 
 const authConfig = {
     providers: [
         {
-            type: "customJwt" as const,
-            issuer: `https://api.workos.com/`,
-            algorithm: "RS256" as const,
-            applicationID: clientId,
-            jwks: `https://api.workos.com/sso/jwks/${clientId}`,
-        },
-        {
-            type: "customJwt" as const,
-            issuer: `https://api.workos.com/user_management/${clientId}`,
-            algorithm: "RS256" as const,
-            jwks: `https://api.workos.com/sso/jwks/${clientId}`,
+            domain: issuerDomain,
+            applicationID: "convex",
         },
     ],
 };

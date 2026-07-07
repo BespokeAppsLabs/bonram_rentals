@@ -11,3 +11,8 @@ yarn-error.log*
 .vercel
 *.tsbuildinfo
 .DS_Store
+.playwright-cli/
+bonram-*.png
+
+# clerk configuration (can include secrets)
+/.clerk/

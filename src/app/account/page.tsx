@@ -2,15 +2,12 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { Button } from "@/components/ui";
 import { Save, Loader2, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function AccountProfilePage() {
-    const { user: authUser } = useAuth();
-    const tokenId = authUser?.id ? `workos|${authUser.id}` : undefined;
-    const dbUser = useQuery(api.users.getByToken, tokenId ? { tokenIdentifier: tokenId } : "skip");
+    const dbUser = useQuery(api.users.currentUser);
     const updateProfile = useMutation(api.users.updateProfile);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);

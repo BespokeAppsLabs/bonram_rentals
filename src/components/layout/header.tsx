@@ -4,7 +4,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
 import { Menu, X, Phone, LogIn, User } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
+import { useUser } from "@clerk/nextjs";
+import Link from "next/link";
+import Image from "next/image";
 
 // ============================================
 // HEADER COMPONENT
@@ -17,7 +19,7 @@ interface HeaderProps {
 
 export function Header({ className }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user } = useUser();
 
   return (
     <header className={cn(
@@ -27,22 +29,25 @@ export function Header({ className }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="relative h-16 w-auto mix-blend-multiply">
-              <img
+              <Image
                 src="/bonram-rentals-logo.jpeg"
                 alt="Bonram Rentals"
-                className="h-full w-auto object-contain"
+                width={104}
+                height={64}
+                className="object-contain"
+                priority
               />
             </div>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <NavLink href="/catalog">Equipment</NavLink>
-            <NavLink href="/coming-soon">Services</NavLink>
-            <NavLink href="/coming-soon">About</NavLink>
-            <NavLink href="/coming-soon">Contact</NavLink>
+            <NavLink href="/services">Services</NavLink>
+            <NavLink href="/about">About</NavLink>
+            <NavLink href="/contact">Contact</NavLink>
           </nav>
 
           {/* Desktop Actions */}
@@ -95,13 +100,13 @@ export function Header({ className }: HeaderProps) {
               <MobileNavLink href="/catalog" onClick={() => setIsMenuOpen(false)}>
                 Equipment
               </MobileNavLink>
-              <MobileNavLink href="/coming-soon" onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink href="/services" onClick={() => setIsMenuOpen(false)}>
                 Services
               </MobileNavLink>
-              <MobileNavLink href="/coming-soon" onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink href="/about" onClick={() => setIsMenuOpen(false)}>
                 About
               </MobileNavLink>
-              <MobileNavLink href="/coming-soon" onClick={() => setIsMenuOpen(false)}>
+              <MobileNavLink href="/contact" onClick={() => setIsMenuOpen(false)}>
                 Contact
               </MobileNavLink>
               <div className="pt-4 border-t border-gray-light">
@@ -151,13 +156,13 @@ export function Header({ className }: HeaderProps) {
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a
+    <Link
       href={href}
       className="text-charcoal font-medium hover:text-navy transition-colors relative group"
     >
       {children}
       <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold transition-all duration-200 group-hover:w-full" />
-    </a>
+    </Link>
   );
 }
 
@@ -171,13 +176,13 @@ function MobileNavLink({
   onClick: () => void;
 }) {
   return (
-    <a
+    <Link
       href={href}
       onClick={onClick}
       className="text-charcoal font-medium hover:text-navy transition-colors py-2"
     >
       {children}
-    </a>
+    </Link>
   );
 }
 

@@ -1,5 +1,80 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin, getAuthUser } from "./auth.helpers";
+import type { Id } from "./_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { internal } from "./_generated/api";
+
+const quotationStatus = v.union(
+  v.literal("draft"),
+  v.literal("pending_review"),
+  v.literal("reviewing"),
+  v.literal("sent_to_client"),
+  v.literal("confirmed"),
+  v.literal("cancelled"),
+);
+
+const eventDetailsValidator = v.object({
+  location: v.string(),
+  locationLat: v.optional(v.number()),
+  locationLng: v.optional(v.number()),
+  guestCount: v.number(),
+  startDate: v.number(),
+  endDate: v.number(),
+  eventType: v.optional(v.string()),
+});
+
+const customerContactValidator = v.object({
+  name: v.string(),
+  email: v.string(),
+  phone: v.string(),
+  company: v.optional(v.string()),
+});
+
+async function requireQuotationAccess(
+  ctx: QueryCtx | MutationCtx,
+  quotationId: Id<"quotations">,
+) {
+  const quotation = await ctx.db.get(quotationId);
+  if (!quotation) throw new Error("Quotation not found");
+  const user = await getAuthUser(ctx);
+  if (!user) throw new Error("Authentication required");
+  if (user.role === "admin" || user.role === "staff" || quotation.userId === user._id) {
+    return quotation;
+  }
+  throw new Error("Insufficient permissions");
+}
+
+const MAX_RENTAL_DAYS = 365;
+const MAX_QUOTE_ITEMS = 50;
+
+function validateEventDetails(eventDetails: {
+  location: string;
+  guestCount: number;
+  startDate: number;
+  endDate: number;
+}) {
+  if (!eventDetails.location.trim()) throw new Error("Location is required");
+  if (!Number.isInteger(eventDetails.guestCount) || eventDetails.guestCount < 1) {
+    throw new Error("Guest count must be at least 1");
+  }
+  if (!Number.isFinite(eventDetails.startDate) || !Number.isFinite(eventDetails.endDate)) {
+    throw new Error("Invalid event dates");
+  }
+  if (eventDetails.endDate < eventDetails.startDate) {
+    throw new Error("Event end date must be after start date");
+  }
+  const durationDays = (eventDetails.endDate - eventDetails.startDate) / 86_400_000;
+  if (durationDays > MAX_RENTAL_DAYS) {
+    throw new Error(`Rental period cannot exceed ${MAX_RENTAL_DAYS} days`);
+  }
+}
+
+function validateContact(contact: { name: string; email: string; phone: string }) {
+  if (!contact.name.trim()) throw new Error("Name is required");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) throw new Error("Valid email is required");
+  if (contact.phone.replace(/\D/g, "").length < 9) throw new Error("Valid phone number is required");
+}
 
 // ============================================
 // QUOTATION QUERIES
@@ -11,6 +86,7 @@ import { v } from "convex/values";
 export const getAll = query({
   args: {},
   handler: async (ctx) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("quotations")
       .order("desc")
@@ -22,11 +98,12 @@ export const getAll = query({
  * Get quotations by status (for Kanban)
  */
 export const getByStatus = query({
-  args: { status: v.string() },
+  args: { status: quotationStatus },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     return await ctx.db
       .query("quotations")
-      .withIndex("by_status", (q) => q.eq("status", args.status as "draft" | "pending_review" | "reviewing" | "sent_to_client" | "confirmed" | "cancelled"))
+      .withIndex("by_status", (q) => q.eq("status", args.status))
       .order("desc")
       .collect();
   },
@@ -38,8 +115,7 @@ export const getByStatus = query({
 export const getById = query({
   args: { id: v.id("quotations") },
   handler: async (ctx, args) => {
-    const quotation = await ctx.db.get(args.id);
-    if (!quotation) return null;
+    const quotation = await requireQuotationAccess(ctx, args.id);
 
     const items = await ctx.db
       .query("quotationItems")
@@ -55,6 +131,11 @@ export const getById = query({
 export const getByUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
+    const user = await getAuthUser(ctx);
+    if (!user) throw new Error("Authentication required");
+    if (user.role !== "admin" && user.role !== "staff" && user._id !== args.userId) {
+      throw new Error("Insufficient permissions");
+    }
     return await ctx.db
       .query("quotations")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -66,23 +147,13 @@ export const getByUser = query({
  */
 export const create = mutation({
   args: {
-    eventDetails: v.object({
-      location: v.string(),
-      locationLat: v.optional(v.number()),
-      locationLng: v.optional(v.number()),
-      guestCount: v.number(),
-      startDate: v.number(),
-      endDate: v.number(),
-      eventType: v.optional(v.string()),
-    }),
-    customerContact: v.object({
-      name: v.string(),
-      email: v.string(),
-      phone: v.string(),
-      company: v.optional(v.string()),
-    }),
+    eventDetails: eventDetailsValidator,
+    customerContact: customerContactValidator,
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    validateEventDetails(args.eventDetails);
+    validateContact(args.customerContact);
     const now = Date.now();
     return await ctx.db.insert("quotations", {
       status: "draft",
@@ -105,6 +176,7 @@ export const createStandalone = mutation({
     customerEmail: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const now = Date.now();
     return await ctx.db.insert("quotations", {
       status: "draft",
@@ -140,6 +212,10 @@ export const addItem = mutation({
     priceAtTime: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    if (!Number.isInteger(args.quantity) || args.quantity < 1 || args.priceAtTime < 0) {
+      throw new Error("Invalid quotation item");
+    }
     const { quotationId, ...itemData } = args;
     const lineTotal = itemData.priceAtTime * itemData.quantity;
 
@@ -186,6 +262,7 @@ export const syncDocumentData = mutation({
     })),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, customerContact, logistics, banking, lineItems } = args;
     const now = Date.now();
 
@@ -247,6 +324,7 @@ export const removeItem = mutation({
     itemId: v.id("quotationItems"),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const item = await ctx.db.get(args.itemId);
     if (!item) throw new Error("Item not found");
 
@@ -264,6 +342,8 @@ export const updateItemQuantity = mutation({
     quantity: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    if (!Number.isInteger(args.quantity) || args.quantity < 1) throw new Error("Invalid quantity");
     const item = await ctx.db.get(args.itemId);
     if (!item) throw new Error("Item not found");
 
@@ -290,11 +370,12 @@ export const updateItemQuantity = mutation({
 export const updateStatus = mutation({
   args: {
     id: v.id("quotations"),
-    status: v.string(),
+    status: quotationStatus,
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     await ctx.db.patch(args.id, {
-      status: args.status as "draft" | "pending_review" | "reviewing" | "sent_to_client" | "confirmed" | "cancelled",
+      status: args.status,
       updatedAt: Date.now(),
     });
   },
@@ -308,8 +389,7 @@ export const submitForReview = mutation({
     id: v.id("quotations"),
   },
   handler: async (ctx, args) => {
-    const quotation = await ctx.db.get(args.id);
-    if (!quotation) throw new Error("Quotation not found");
+    await requireQuotationAccess(ctx, args.id);
 
     await ctx.db.patch(args.id, {
       status: "pending_review",
@@ -330,6 +410,7 @@ export const updatePricing = mutation({
     internalNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
     const quotation = await ctx.db.get(id);
     if (!quotation) throw new Error("Quotation not found");
@@ -360,6 +441,7 @@ export const updateSettings = mutation({
     })),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
   },
@@ -371,17 +453,11 @@ export const updateSettings = mutation({
 export const updateEventDetails = mutation({
   args: {
     id: v.id("quotations"),
-    eventDetails: v.object({
-      location: v.string(),
-      locationLat: v.optional(v.number()),
-      locationLng: v.optional(v.number()),
-      guestCount: v.number(),
-      startDate: v.number(),
-      endDate: v.number(),
-      eventType: v.optional(v.string()),
-    }),
+    eventDetails: eventDetailsValidator,
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    validateEventDetails(args.eventDetails);
     await ctx.db.patch(args.id, {
       eventDetails: args.eventDetails,
       updatedAt: Date.now(),
@@ -410,13 +486,13 @@ export const updateEventDetails = mutation({
 // HELPER FUNCTIONS
 // ============================================
 
-async function updateQuotationTotals(ctx: any, quotationId: any) {
+async function updateQuotationTotals(ctx: MutationCtx, quotationId: Id<"quotations">) {
   const items = await ctx.db
     .query("quotationItems")
-    .withIndex("by_quotation", (q: any) => q.eq("quotationId", quotationId))
+    .withIndex("by_quotation", (q) => q.eq("quotationId", quotationId))
     .collect();
 
-  const subtotal = items.reduce((sum: number, item: any) => sum + item.lineTotal, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
 
   const quotation = await ctx.db.get(quotationId);
   const deliveryFee = quotation?.deliveryFee ?? 0;
@@ -429,3 +505,109 @@ async function updateQuotationTotals(ctx: any, quotationId: any) {
     updatedAt: Date.now(),
   });
 }
+
+export const submitQuote = mutation({
+  args: {
+    eventDetails: eventDetailsValidator,
+    customerContact: customerContactValidator,
+    specialRequests: v.optional(v.string()),
+    source: v.optional(v.string()),
+    items: v.array(v.object({
+      productId: v.id("products"),
+      quantity: v.number(),
+    })),
+  },
+  handler: async (ctx, args) => {
+    validateEventDetails(args.eventDetails);
+    if (args.eventDetails.startDate < Date.now() - 86_400_000) {
+      throw new Error("Event start date cannot be in the past");
+    }
+    validateContact(args.customerContact);
+    if (args.items.length === 0) throw new Error("Select at least one item");
+    if (args.items.length > MAX_QUOTE_ITEMS) throw new Error(`Quotes are limited to ${MAX_QUOTE_ITEMS} line items`);
+
+    // Validate each item individually before aggregating (catches negative quantities)
+    for (const item of args.items) {
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) throw new Error("Invalid item quantity");
+    }
+    // Aggregate duplicate productIds so stock check uses the true combined quantity
+    const merged = new Map<string, number>();
+    for (const item of args.items) {
+      const total = (merged.get(item.productId) ?? 0) + item.quantity;
+      if (total > 10_000) throw new Error("Quantity overflow");
+      merged.set(item.productId, total);
+    }
+    const deduplicatedItems = Array.from(merged.entries()).map(([productId, quantity]) => ({
+      productId: productId as Id<"products">,
+      quantity,
+    }));
+
+    const now = Date.now();
+    const days = Math.max(1, Math.ceil((args.eventDetails.endDate - args.eventDetails.startDate) / 86_400_000));
+    const user = await getAuthUser(ctx);
+    const validatedItems: Array<{
+      productId: Id<"products">;
+      description: string;
+      quantity: number;
+      priceAtTime: number;
+      lineTotal: number;
+    }> = [];
+
+    for (const item of deduplicatedItems) {
+      const product = await ctx.db.get(item.productId);
+      if (!product || !product.isActive) throw new Error("Selected product is unavailable");
+      const bookings = await ctx.db
+        .query("bookings")
+        .withIndex("by_product", (q) => q.eq("productId", item.productId))
+        .filter((q) => q.and(
+          q.lt(q.field("startDate"), args.eventDetails.endDate),
+          q.gt(q.field("endDate"), args.eventDetails.startDate),
+          q.or(q.eq(q.field("status"), "reserved"), q.eq(q.field("status"), "confirmed")),
+        ))
+        .collect();
+      const booked = bookings.reduce((sum, booking) => sum + booking.quantity, 0);
+      if (item.quantity > product.totalStock - booked) {
+        throw new Error(`${product.name} no longer has enough stock for selected dates`);
+      }
+      validatedItems.push({
+        productId: item.productId,
+        description: product.name,
+        quantity: item.quantity,
+        priceAtTime: product.dailyRate,
+        lineTotal: product.dailyRate * item.quantity * days,
+      });
+    }
+
+    const subtotal = validatedItems.reduce((sum, item) => sum + item.lineTotal, 0);
+    const rand = Math.random().toString(36).substring(2).padEnd(4, "0").slice(0, 4).toUpperCase();
+    const publicReference = `BR-${new Date(now).getFullYear()}-${now.toString(36).toUpperCase()}-${rand}`;
+    const quotationId = await ctx.db.insert("quotations", {
+      userId: user?._id,
+      publicReference,
+      submittedAt: now,
+      specialRequests: args.specialRequests?.trim() || undefined,
+      source: args.source,
+      status: "pending_review",
+      eventDetails: args.eventDetails,
+      customerContact: args.customerContact,
+      subtotal,
+      total: subtotal,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    for (const item of validatedItems) {
+      await ctx.db.insert("quotationItems", { quotationId, ...item });
+    }
+    await ctx.db.insert("funnelEvents", { event: "quote_submitted", source: args.source, createdAt: now });
+    await ctx.scheduler.runAfter(0, internal.notifications.sendQuoteSubmitted, {
+      publicReference,
+      customerName: args.customerContact.name,
+      customerEmail: args.customerContact.email,
+      customerPhone: args.customerContact.phone,
+      location: args.eventDetails.location,
+      startDate: args.eventDetails.startDate,
+    });
+    return { quotationId, publicReference };
+  },
+});

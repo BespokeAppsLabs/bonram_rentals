@@ -5,7 +5,7 @@ export const paginateItems = (items: any[]) => {
     const otherPageCapacity = 18;
 
     const pages = [];
-    let currentItems = [...items];
+    const currentItems = [...items];
 
     // Page 1
     pages.push(currentItems.splice(0, firstPageCapacity));
