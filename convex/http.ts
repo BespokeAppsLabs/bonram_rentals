@@ -36,13 +36,16 @@ const badRequest = (msg: string) =>
     headers: { "Content-Type": "application/json" },
   });
 
-// Convex throws on a malformed v.id() argument (e.g. a bad ?id= from a client),
-// which would otherwise surface as an unhandled 500 instead of a 400.
-async function safeRun<T>(fn: () => Promise<T>): Promise<{ ok: true; data: T } | { ok: false }> {
+// Convex throws on a malformed v.id() argument or a handler-level Error (e.g. a bad
+// ?id=, "Invalid dailyRate", "Product not found"), which would otherwise surface as
+// an unhandled 500 instead of a 400 with the real reason.
+async function safeRun<T>(
+  fn: () => Promise<T>
+): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   try {
     return { ok: true, data: await fn() };
-  } catch {
-    return { ok: false };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "invalid request" };
   }
 }
 
@@ -67,7 +70,7 @@ http.route({
     const result = await safeRun(() =>
       ctx.runQuery(internal.agentApi.getBonramProductById, { id: id as any })
     );
-    if (!result.ok) return badRequest("invalid product id");
+    if (!result.ok) return badRequest(result.error);
     if (!result.data) return badRequest("product not found");
     return ok(result.data);
   }),
@@ -98,7 +101,7 @@ http.route({
         dailyRate: body.dailyRate,
       })
     );
-    if (!result.ok) return badRequest("invalid productId");
+    if (!result.ok) return badRequest(result.error);
     return ok(result.data);
   }),
 });
@@ -111,11 +114,13 @@ http.route({
     const body = await req.json().catch(() => null);
     if (!body?.customer?.name || !body?.customer?.email)
       return badRequest("require { customer: { name, email, ... } }");
-    return ok(
-      await ctx.runMutation(internal.agentApi.agentCreateInvoiceUser, {
+    const result = await safeRun(() =>
+      ctx.runMutation(internal.agentApi.agentCreateInvoiceUser, {
         customer: body.customer,
       })
     );
+    if (!result.ok) return badRequest(result.error);
+    return ok(result.data);
   }),
 });
 
@@ -129,14 +134,16 @@ http.route({
       return badRequest("require { customer: { name, email }, items: [...] }");
     if (!Array.isArray(body.items) || body.items.length === 0)
       return badRequest("items must be a non-empty array");
-    return ok(
-      await ctx.runMutation(internal.agentApi.agentCreateInvoice, {
+    const result = await safeRun(() =>
+      ctx.runMutation(internal.agentApi.agentCreateInvoice, {
         customer: body.customer,
         eventDetails: body.eventDetails,
         items: body.items,
         dueDate: body.dueDate,
       })
     );
+    if (!result.ok) return badRequest(result.error);
+    return ok(result.data);
   }),
 });
 

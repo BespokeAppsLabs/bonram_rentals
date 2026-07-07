@@ -39,6 +39,7 @@ while IFS= read -r relative; do
     *.png) magic='PNG image data, 1024 x 768' ;;
     *.jpg | *.jpeg) magic='JPEG image data' ;;
     *.webp) magic='RIFF.*Web/P' ;;
+    *) echo "Unsupported extension: $relative" >&2; exit 1 ;;
   esac
   file "$image" | grep -qE "$magic" || { echo "Invalid image: $image" >&2; exit 1; }
 done < <(jq -r '.[].file' "$manifest")
@@ -78,6 +79,7 @@ while IFS= read -r row; do
     *.png) content_type=image/png ;;
     *.jpg | *.jpeg) content_type=image/jpeg ;;
     *.webp) content_type=image/webp ;;
+    *) echo "Unsupported extension: $relative" >&2; exit 1 ;;
   esac
   prepared="$(CI=1 npx convex run seedImages:prepareUpload "$(jq -nc --arg productName "$product" '{productName:$productName}')")"
   upload_response="$(curl -fsS -H "Content-Type: $content_type" --data-binary "@$image" "$(jq -r .uploadUrl <<<"$prepared")")"
