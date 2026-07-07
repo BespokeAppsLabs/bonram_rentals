@@ -41,12 +41,13 @@ while IFS= read -r relative; do
   image="$project_root/$relative"
   [[ -f "$image" ]] || { echo "Missing image: $image" >&2; exit 1; }
   case "$relative" in
-    *.png) magic='PNG image data, 1024 x 768' ;;
-    *.jpg | *.jpeg) magic='JPEG image data' ;;
-    *.webp) magic='RIFF.*Web/P' ;;
+    *.png) expected_mime=image/png ;;
+    *.jpg | *.jpeg) expected_mime=image/jpeg ;;
+    *.webp) expected_mime=image/webp ;;
     *) echo "Unsupported extension: $relative" >&2; exit 1 ;;
   esac
-  file "$image" | grep -qE "$magic" || { echo "Invalid image: $image" >&2; exit 1; }
+  mime="$(file -b --mime-type "$image")"
+  [[ "$mime" == "$expected_mime" ]] || { echo "Invalid image MIME type for $relative: $mime (expected $expected_mime)" >&2; exit 1; }
 done < <(jq -r '.[].file' "$manifest")
 
 jq -e --argjson protected "$protected" 'all(.[] | select(.name as $name | $protected | index($name)); .imageStorageId != null)' <<<"$audit" >/dev/null || {

@@ -208,13 +208,11 @@ export const agentCreateInvoice = internalMutation({
     // would eventually exceed Convex's transaction read limit as invoices accumulate.
     const year = new Date().getFullYear();
     const latestInvoice = await ctx.db.query("invoices").order("desc").first();
-    const latestYear = latestInvoice
-      ? Number(latestInvoice.invoiceNumber.split("-")[1])
-      : null;
-    const latestCount = latestInvoice
-      ? Number(latestInvoice.invoiceNumber.split("-")[2])
-      : 0;
-    const count = latestYear === year ? latestCount + 1 : 1;
+    const parts = latestInvoice?.invoiceNumber.split("-") ?? [];
+    const latestYear = parts.length === 3 ? Number(parts[1]) : null;
+    const latestCount = parts.length === 3 ? Number(parts[2]) : 0;
+    const count =
+      latestYear === year && !Number.isNaN(latestCount) ? latestCount + 1 : 1;
     const invoiceNumber = `INV-${year}-${String(count).padStart(3, "0")}`;
     const dueDate = args.dueDate ?? now + 30 * 24 * 60 * 60 * 1000;
 

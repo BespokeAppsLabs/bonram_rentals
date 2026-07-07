@@ -15,7 +15,7 @@ import { ArrowRight, CheckCircle, Users, Building2, Calendar, Loader2 } from "lu
 // ============================================
 
 export default function HomePage() {
-  const products = useQuery(api.products.getAll);
+  const products = useQuery(api.products.getAllWithImages);
   const featured = products?.slice(0, 3);
 
   return (
