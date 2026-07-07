@@ -1,0 +1,6 @@
+name: ref-images-bulk-gen
+description: Bash-only, zero-LLM Bonram FLUX.2 generation with attached references, sequential waits, and duplicate-safe resume.
+nodes:
+  - id: generate-sequentially
+    bash: "bash .archon/scripts/ref-images-bulk-gen.sh $ARGUMENTS"
+    timeout: 14400000
