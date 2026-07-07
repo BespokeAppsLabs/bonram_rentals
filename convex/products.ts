@@ -21,6 +21,30 @@ export const getAll = query({
 });
 
 /**
+ * Get all active products with storage image URLs resolved
+ */
+export const getAllWithImages = query({
+  args: {},
+  handler: async (ctx) => {
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_active", (q) => q.eq("isActive", true))
+      .order("desc")
+      .collect();
+
+    return Promise.all(
+      products.map(async (product) => {
+        if (product.imageStorageId) {
+          const url = await ctx.storage.getUrl(product.imageStorageId);
+          return { ...product, imageUrl: url ?? product.imageUrl };
+        }
+        return product;
+      })
+    );
+  },
+});
+
+/**
  * Get ALL products including inactive (admin only)
  */
 export const getAllIncludingInactive = query({

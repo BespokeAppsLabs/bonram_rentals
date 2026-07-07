@@ -8,14 +8,17 @@
  * @module
  */
 
+import type * as agentApi from "../agentApi.js";
 import type * as analytics from "../analytics.js";
 import type * as files from "../files.js";
+import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as notifications from "../notifications.js";
 import type * as products from "../products.js";
 import type * as quotations from "../quotations.js";
 import type * as recommendations from "../recommendations.js";
 import type * as seed from "../seed.js";
+import type * as seedImages from "../seedImages.js";
 import type * as users from "../users.js";
 
 import type {
@@ -25,14 +28,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentApi: typeof agentApi;
   analytics: typeof analytics;
   files: typeof files;
+  http: typeof http;
   invoices: typeof invoices;
   notifications: typeof notifications;
   products: typeof products;
   quotations: typeof quotations;
   recommendations: typeof recommendations;
   seed: typeof seed;
+  seedImages: typeof seedImages;
   users: typeof users;
 }>;
 

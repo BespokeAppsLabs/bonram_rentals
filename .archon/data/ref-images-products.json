@@ -1,0 +1,355 @@
+[
+  {
+    "product": "VIP Toilet Trailer",
+    "slug": "vip-toilet-trailer",
+    "prompt": "A pristine four-unit luxury mobile toilet trailer parked level on a manicured event lawn, white exterior, real unit proportions and fittings preserved, doors closed, stabilisers correctly placed, three-quarter front view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/equipment-vip-toilet-exterior.jpeg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Standard Portable Toilet",
+    "slug": "standard-portable-toilet",
+    "prompt": "One clean standard portable toilet cubicle on firm level ground at a professional outdoor event site, accurate moulded shell, door hardware, ventilation and base design matching the reference, three-quarter view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-standard-portable-toilet.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Deluxe Portable Toilet",
+    "slug": "deluxe-portable-toilet",
+    "prompt": "Premium portable toilet cubicle with the door open enough to reveal the real mirror, sanitiser dispenser and ventilation details, exterior and interior matching the reference, clean neutral event setting. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-deluxe-portable-toilet.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Hand Wash Station",
+    "slug": "hand-wash-station",
+    "prompt": "Freestanding portable hand-wash station with a 40-litre fresh-water tank, foot pump, basin, soap dispenser and paper-towel holder, fully visible against a clean outdoor event backdrop. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-hand-wash-station.webp"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "White Event Tent (10x20m)",
+    "slug": "white-event-tent-10x20m",
+    "prompt": "real 10-by-20-metre white marquee fully erected on grass, straight roof lines, tensioned fabric and fitted sidewalls, empty interior visible, elegant wedding venue surroundings, wide three-quarter exterior view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/equipment-tent-white-elegant.jpeg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Medium Tent (6x12m)",
+    "slug": "medium-tent-6x12m",
+    "prompt": "A correctly proportioned 6-by-12-metre white event tent fully erected with clean sidewalls, secured poles and visible entrances, medium corporate gathering setting, wide three-quarter view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-medium-tent-generic.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Small Tent (3x6m)",
+    "slug": "small-tent-3x6m",
+    "prompt": "A compact 3-by-6-metre white gazebo-style event tent, properly anchored and empty, suitable for registration or catering service, clean outdoor venue, three-quarter view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-small-tent-generic.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Stage Platform (2x4m)",
+    "slug": "stage-platform-2x4m",
+    "prompt": "Real 2-by-4-metre modular stage platform with adjustable legs, black skirt, one safe access step and accurate deck construction, isolated in a clean event hall. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-stage-platform.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Large Stage (4x8m)",
+    "slug": "large-stage-4x8m",
+    "prompt": "Real 4-by-8-metre professional event stage fully assembled with matching safety rails, stairs and black skirting, structurally credible proportions, empty indoor venue, wide front three-quarter view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-large-stage.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "MW8000D Generator",
+    "slug": "mw8000d-generator",
+    "prompt": "Exact red MaxWatt MW8000D silent diesel generator from the reference, accurate housing, wheels, handles, control panel and model geometry, freshly cleaned, three-quarter product view on a neutral industrial-event surface. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/equipment-generator-mw8000d.jpeg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Large Generator (15kW)",
+    "slug": "large-generator-15kw",
+    "prompt": "Exact 15kW silent diesel generator, real enclosure, control panel, outlets, wheels or trailer frame preserved from reference, clean three-quarter product view at an event power station. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-generator-15kw.webp"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Industrial Generator (30kW)",
+    "slug": "industrial-generator-30kw",
+    "prompt": "Exact 30kW industrial silent generator, accurate enclosure, vents, control panel, cable connections and transport base from reference, clean three-quarter view in a professional outdoor event compound. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-generator-30kw.webp"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Distribution Board",
+    "slug": "distribution-board",
+    "prompt": "Exact event power distribution board from reference, enclosure open to show the real protected outlets, breakers and labels without altering circuitry, safely disconnected, straight-on catalogue view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-distribution-board.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Standard PA System",
+    "slug": "standard-pa-system",
+    "prompt": "Complete standard PA package arranged neatly: two real speakers on stands, compact mixer, cables and microphones matching inventory, all components visible against a neutral event-hall background. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-standard-pa-system.png"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "XL Audio Package",
+    "slug": "xl-audio-package",
+    "prompt": "Complete XL audio package arranged as one coherent rental kit: four speakers, real subwoofers, mixer and wireless microphones matching references, cables tidy, wide catalogue composition. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-xl-audio-package.webp"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Concert Sound System",
+    "slug": "concert-sound-system",
+    "prompt": "actual concert-grade sound package with real line-array modules, subwoofers, stage monitors and mixing console, correctly rigged in an empty venue, wide symmetrical catalogue photograph. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-concert-sound-system.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Wireless Microphone Set",
+    "slug": "wireless-microphone-set",
+    "prompt": "Exact pair of wireless handheld microphones beside their real dual receiver and antennas, accurate controls and connectors, neatly arranged on a dark neutral tabletop. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-wireless-microphone-set.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Plastic Chairs",
+    "slug": "plastic-chairs",
+    "prompt": "One exact white stackable plastic chair, real moulding and backrest pattern preserved, spotless, isolated on a soft warm-grey studio floor, three-quarter front view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/equipment-chairs-transport.jpeg",
+      "docs/assets/ref-online/ref-online-plastic-chair.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Tiffany Chairs",
+    "slug": "tiffany-chairs",
+    "prompt": "One exact Tiffany/Chiavari chair matching the reference frame colour, spindle design, seat cushion and finish, spotless, isolated in a refined neutral studio setting. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-tiffany-chair.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Round Tables (1.8m)",
+    "slug": "round-tables-1-8m",
+    "prompt": "One 1.8-metre round rental banquet table shown uncovered so the real folding legs and tabletop are visible, accurate scale, spotless, neutral event hall. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-round-table-180cm.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Rectangular Tables (1.8m)",
+    "slug": "rectangular-tables-1-8m",
+    "prompt": "One 1.8-metre rectangular folding rental table shown uncovered, accurate tabletop thickness and folding-leg structure, spotless, neutral event hall, three-quarter view. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-rectangular-table-180cm.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Cocktail Tables",
+    "slug": "cocktail-tables",
+    "prompt": "One exact standing cocktail table with the real white top, stem, base and height from reference, spotless, isolated in an elegant but neutral reception setting. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-cocktail-table.png"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Fairy Light Canopy",
+    "slug": "fairy-light-canopy",
+    "prompt": "Warm-white 50-metre fairy-light canopy professionally tensioned beneath a white marquee ceiling, evenly spaced strands, empty elegant venue at early evening, realistic exposure and warm ambience. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-fairy-light-canopy.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "LED Uplighters (Set of 8)",
+    "slug": "led-uplighters-set-of-8",
+    "prompt": "Eight exact RGB LED uplighters matching the reference, evenly arranged as a complete rental set, powered on with restrained warm-gold and navy light, all fixtures clearly visible. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-led-uplighters.webp"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Stage Lighting Package",
+    "slug": "stage-lighting-package",
+    "prompt": "Complete stage-lighting package using the exact moving heads, spotlights, stands or truss and controller from references, professionally rigged on an empty stage, every included component visible. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/equipment-stage-lighting-concept.png"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Flood Lights",
+    "slug": "flood-lights",
+    "prompt": "Exact high-output LED floodlight units matching reference housings, brackets, stands and cables, arranged as a clean rental set on a neutral outdoor surface at dusk. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-flood-lights.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Industrial Fan",
+    "slug": "industrial-fan",
+    "prompt": "Exact industrial floor fan matching the reference diameter, metal guard, blades, motor housing and stand, freshly cleaned, isolated in a white event tent. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-industrial-fan.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Portable Air Conditioner",
+    "slug": "portable-air-conditioner",
+    "prompt": "Exact 12000-BTU portable air conditioner with real vents, controls, wheels and exhaust-hose kit from reference, clean three-quarter view inside an empty marquee. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-portable-air-conditioner.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Gas Braai (BBQ)",
+    "slug": "gas-braai-bbq",
+    "prompt": "Exact commercial gas braai matching the reference cooking surface, burner controls, frame, wheels and gas connection, lid open, spotless and unlit, neutral catering area. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-gas-braai.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Chafing Dishes (Set of 4)",
+    "slug": "chafing-dishes-set-of-4",
+    "prompt": "Complete set of four matching stainless-steel chafing dishes with lids and real fuel holders, polished and empty, aligned on a white-clothed buffet table in a neutral venue. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-chafing-dishes-set.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Commercial Ice Machine",
+    "slug": "commercial-ice-machine",
+    "prompt": "Exact commercial ice machine matching the reference cabinet, vents, controls and bin door, spotless stainless finish, three-quarter view in a clean temporary catering station. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-commercial-ice-machine.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  },
+  {
+    "product": "Beverage Cooler",
+    "slug": "beverage-cooler",
+    "prompt": "Exact 50-litre beverage cooler from reference, accurate lid, handles, tap or refrigeration details, spotless, isolated in a clean event beverage station. Ultra-realistic commercial rental catalogue photography, authentic South African event-hire context, immaculate professionally maintained equipment, natural materials and accurate proportions, soft daylight with subtle studio fill, navy and warm-gold visual accents only where appropriate, premium but believable, no people, no text, no watermark, no invented logos, no duplicate equipment, 4:3 landscape, high detail.",
+    "references": [
+      "docs/assets/ref-online/ref-online-beverage-cooler-50l.jpg"
+    ],
+    "aspect_ratio": "4:3",
+    "resolution": "1k",
+    "model": "pro"
+  }
+]

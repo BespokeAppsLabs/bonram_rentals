@@ -3,6 +3,7 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/hero/hero-section";
+import { ClientLogoStrip } from "@/components/home/client-logo-strip";
 import { Button, Card, CardBody } from "@/components/ui";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -14,7 +15,7 @@ import { ArrowRight, CheckCircle, Users, Building2, Calendar, Loader2 } from "lu
 // ============================================
 
 export default function HomePage() {
-  const products = useQuery(api.products.getAll);
+  const products = useQuery(api.products.getAllWithImages);
   const featured = products?.slice(0, 3);
 
   return (
@@ -111,6 +112,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Trusted By - Client Logo Marquee */}
+      <ClientLogoStrip />
 
       {/* CTA Section - Solid Navy */}
       <section className="py-16 md:py-24 bg-navy border-t border-gold">

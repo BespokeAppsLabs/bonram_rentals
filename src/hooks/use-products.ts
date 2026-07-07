@@ -27,7 +27,7 @@ function useLoadTimeout(isLoading: boolean) {
 }
 
 export function useProducts() {
-  const products = useQuery(api.products.getAll);
+  const products = useQuery(api.products.getAllWithImages);
   const isLoading = products === undefined;
   const timedOut = useLoadTimeout(isLoading);
   return {

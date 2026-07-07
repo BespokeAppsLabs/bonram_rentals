@@ -30,7 +30,7 @@ export function Header({ className }: HeaderProps) {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative h-16 w-auto mix-blend-multiply">
+            <div className="relative h-11 md:h-14 w-auto mix-blend-multiply">
               <Image
                 src="/bonram-rentals-logo.jpeg"
                 alt="Bonram Rentals"
