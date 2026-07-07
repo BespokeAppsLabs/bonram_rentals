@@ -17,6 +17,15 @@ ledger="$artifact_dir/convex-image-seed-dev.jsonl"
 cd "$repo_root"
 for command in jq curl file npx; do command -v "$command" >/dev/null || { echo "Missing command: $command" >&2; exit 1; }; done
 
+mime_for() {
+  case "$1" in
+    *.png) echo image/png ;;
+    *.jpg | *.jpeg) echo image/jpeg ;;
+    *.webp) echo image/webp ;;
+    *) echo "Unsupported extension: $1" >&2; exit 1 ;;
+  esac
+}
+
 jq -e 'length == 28 and ([.[].product] | length) == ([.[].product] | unique | length)' "$manifest" >/dev/null || {
   echo "Manifest must contain 28 unique products" >&2
   exit 1
@@ -40,12 +49,7 @@ jq -e --argjson protected "$protected" 'all(.[]; .product as $name | ($protected
 while IFS= read -r relative; do
   image="$project_root/$relative"
   [[ -f "$image" ]] || { echo "Missing image: $image" >&2; exit 1; }
-  case "$relative" in
-    *.png) expected_mime=image/png ;;
-    *.jpg | *.jpeg) expected_mime=image/jpeg ;;
-    *.webp) expected_mime=image/webp ;;
-    *) echo "Unsupported extension: $relative" >&2; exit 1 ;;
-  esac
+  expected_mime="$(mime_for "$relative")"
   mime="$(file -b --mime-type "$image")"
   [[ "$mime" == "$expected_mime" ]] || { echo "Invalid image MIME type for $relative: $mime (expected $expected_mime)" >&2; exit 1; }
 done < <(jq -r '.[].file' "$manifest")
@@ -79,12 +83,7 @@ while IFS= read -r row; do
   fi
 
   echo "UPLOAD $product"
-  case "$relative" in
-    *.png) content_type=image/png ;;
-    *.jpg | *.jpeg) content_type=image/jpeg ;;
-    *.webp) content_type=image/webp ;;
-    *) echo "Unsupported extension: $relative" >&2; exit 1 ;;
-  esac
+  content_type="$(mime_for "$relative")"
   prepared="$(CI=1 npx convex run seedImages:prepareUpload "$(jq -nc --arg productName "$product" '{productName:$productName}')")"
   upload_response="$(curl -fsS -H "Content-Type: $content_type" --data-binary "@$image" "$(jq -r .uploadUrl <<<"$prepared")")"
   storage_id="$(jq -er '.storageId' <<<"$upload_response")"
