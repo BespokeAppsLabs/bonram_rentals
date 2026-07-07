@@ -78,8 +78,9 @@ async function ensureInvoiceUser(
   return await ctx.db.insert("users", {
     name: c.name,
     email: c.email,
-    // Synthetic identifier, not a real Clerk identity → this user can never authenticate.
-    tokenIdentifier: `agent-invoice:${c.email}:${now}`,
+    // "pending" is the same sentinel seed.ts/users.ts:linkUser use for invited-but-unregistered
+    // users — Clerk login then merges this record by email instead of creating a duplicate.
+    tokenIdentifier: "pending",
     role: "customer" as const,
     phone: c.phone,
     company: c.company,
@@ -184,14 +185,24 @@ export const agentCreateInvoice = internalMutation({
         lineTotal,
       });
     }
-    await ctx.db.patch(quotationId, { subtotal, total: subtotal, updatedAt: now });
-
-    // Invoice number + VAT — mirrors invoices.ts createInvoiceHandler exactly.
-    const allInvoices = await ctx.db.query("invoices").collect();
-    const year = new Date().getFullYear();
-    const invoiceNumber = `INV-${year}-${String(allInvoices.length + 1).padStart(3, "0")}`;
+    // VAT — mirrors invoices.ts createInvoiceHandler. Applied to the quotation too, so the
+    // quoted total matches the invoiced total instead of quietly excluding VAT.
     const vatAmount = Math.round(subtotal * 0.15 * 100) / 100;
     const total = subtotal + vatAmount;
+    await ctx.db.patch(quotationId, { subtotal, total, updatedAt: now });
+
+    // Invoice number: read the latest invoice instead of scanning the whole table, which
+    // would eventually exceed Convex's transaction read limit as invoices accumulate.
+    const year = new Date().getFullYear();
+    const latestInvoice = await ctx.db.query("invoices").order("desc").first();
+    const latestYear = latestInvoice
+      ? Number(latestInvoice.invoiceNumber.split("-")[1])
+      : null;
+    const latestCount = latestInvoice
+      ? Number(latestInvoice.invoiceNumber.split("-")[2])
+      : 0;
+    const count = latestYear === year ? latestCount + 1 : 1;
+    const invoiceNumber = `INV-${year}-${String(count).padStart(3, "0")}`;
     const dueDate = args.dueDate ?? now + 30 * 24 * 60 * 60 * 1000;
 
     const invoiceId = await ctx.db.insert("invoices", {

@@ -3,6 +3,8 @@
 // Institutional Luxury Design
 // ============================================
 
+import Image from "next/image";
+
 const clients: { name: string; logo?: string }[] = [
   { name: "Eskom", logo: "/logo/partner_logo/Eskom.png" },
   { name: "EXXARO", logo: "/logo/partner_logo/exxaro.png" },
@@ -35,7 +37,10 @@ export function ClientLogoStrip() {
       </div>
 
       <div className="marquee-container">
-        <div className="marquee-track flex gap-5 w-max px-5">
+        {/* No horizontal padding here: translateX(-50%) must land exactly on the
+            start of the duplicated set, so the track's content has to be two
+            symmetric copies with nothing thrown off by edge padding. */}
+        <div className="marquee-track flex gap-5 w-max">
           {[...clients, ...clients].map((client, i) => (
             <div
               key={`${client.name}-${i}`}
@@ -43,10 +48,11 @@ export function ClientLogoStrip() {
             >
               <div className="flex items-center justify-center flex-1 w-full">
                 {client.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={client.logo}
                     alt={`${client.name} logo`}
+                    width={120}
+                    height={40}
                     className="object-contain max-h-10 w-auto"
                   />
                 ) : (

@@ -36,6 +36,16 @@ const badRequest = (msg: string) =>
     headers: { "Content-Type": "application/json" },
   });
 
+// Convex throws on a malformed v.id() argument (e.g. a bad ?id= from a client),
+// which would otherwise surface as an unhandled 500 instead of a 400.
+async function safeRun<T>(fn: () => Promise<T>): Promise<{ ok: true; data: T } | { ok: false }> {
+  try {
+    return { ok: true, data: await fn() };
+  } catch {
+    return { ok: false };
+  }
+}
+
 // ---------- READS ----------
 
 http.route({
@@ -54,11 +64,12 @@ http.route({
     if (!authorized(req)) return unauthorized();
     const id = new URL(req.url).searchParams.get("id");
     if (!id) return badRequest("missing ?id");
-    const data = await ctx.runQuery(internal.agentApi.getBonramProductById, {
-      id: id as any,
-    });
-    if (!data) return badRequest("product not found");
-    return ok(data);
+    const result = await safeRun(() =>
+      ctx.runQuery(internal.agentApi.getBonramProductById, { id: id as any })
+    );
+    if (!result.ok) return badRequest("invalid product id");
+    if (!result.data) return badRequest("product not found");
+    return ok(result.data);
   }),
 });
 
@@ -81,12 +92,14 @@ http.route({
     const body = await req.json().catch(() => null);
     if (!body?.productId || typeof body.dailyRate !== "number")
       return badRequest("require { productId, dailyRate:number }");
-    return ok(
-      await ctx.runMutation(internal.agentApi.agentUpdateProductPricing, {
+    const result = await safeRun(() =>
+      ctx.runMutation(internal.agentApi.agentUpdateProductPricing, {
         productId: body.productId,
         dailyRate: body.dailyRate,
       })
     );
+    if (!result.ok) return badRequest("invalid productId");
+    return ok(result.data);
   }),
 });
 

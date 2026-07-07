@@ -21,8 +21,8 @@ jq -e 'length == 28 and ([.[].product] | length) == ([.[].product] | unique | le
   echo "Manifest must contain 28 unique products" >&2
   exit 1
 }
-jq -e 'all(.[]; (.file | endswith("_generated.png")))' "$manifest" >/dev/null || {
-  echo "Every seeded image must use the _generated.png suffix" >&2
+jq -e 'all(.[]; (.file | test("_generated\\.(png|jpg|jpeg|webp)$")))' "$manifest" >/dev/null || {
+  echo "Every seeded image must use a _generated.(png|jpg|jpeg|webp) suffix" >&2
   exit 1
 }
 
@@ -35,7 +35,12 @@ jq -e --argjson protected "$protected" 'all(.[]; .product as $name | ($protected
 while IFS= read -r relative; do
   image="$project_root/$relative"
   [[ -f "$image" ]] || { echo "Missing image: $image" >&2; exit 1; }
-  file "$image" | grep -q 'PNG image data, 1024 x 768' || { echo "Invalid image: $image" >&2; exit 1; }
+  case "$relative" in
+    *.png) magic='PNG image data, 1024 x 768' ;;
+    *.jpg | *.jpeg) magic='JPEG image data' ;;
+    *.webp) magic='RIFF.*Web/P' ;;
+  esac
+  file "$image" | grep -qE "$magic" || { echo "Invalid image: $image" >&2; exit 1; }
 done < <(jq -r '.[].file' "$manifest")
 
 audit="$(CI=1 npx convex run seedImages:audit '{}')"
@@ -69,8 +74,13 @@ while IFS= read -r row; do
   fi
 
   echo "UPLOAD $product"
+  case "$relative" in
+    *.png) content_type=image/png ;;
+    *.jpg | *.jpeg) content_type=image/jpeg ;;
+    *.webp) content_type=image/webp ;;
+  esac
   prepared="$(CI=1 npx convex run seedImages:prepareUpload "$(jq -nc --arg productName "$product" '{productName:$productName}')")"
-  upload_response="$(curl -fsS -H 'Content-Type: image/png' --data-binary "@$image" "$(jq -r .uploadUrl <<<"$prepared")")"
+  upload_response="$(curl -fsS -H "Content-Type: $content_type" --data-binary "@$image" "$(jq -r .uploadUrl <<<"$prepared")")"
   storage_id="$(jq -er '.storageId' <<<"$upload_response")"
   args="$(jq -nc \
     --arg productId "$(jq -r .productId <<<"$prepared")" \
